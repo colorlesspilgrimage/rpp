@@ -179,3 +179,7 @@ The supervisor reads only those last lines and the reports, which keeps its cont
   removes them. The four review branches are kept.
 - Agents may not change the model they run on, and the supervisor may not override an agent's model.
   Each step uses the model you chose at install time. To change a model, re-run `install.sh`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
