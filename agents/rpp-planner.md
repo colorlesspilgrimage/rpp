@@ -22,6 +22,8 @@ The plan must contain these sections, in this order:
      `node_modules`). A directory is shared by symlink into other worktrees, so list it only if it has no
      link to this repo's own source (no editable installs, no workspace links). If you are not sure, write `none`.
 3. Implementation steps, in order. Give exact file paths and function or module names.
+   If text from a user, a file, or the environment goes into a shell command, a path, or a file format,
+   give the full rule for each place. Never write that a safety measure (for example `--`) is not needed.
 4. Tests to write: file paths, cases, edge cases, expected results.
 5. Acceptance criteria: a checklist. Each item is a behavior that a user can see.
 6. Manual check script: exact commands, inputs, and expected outputs to run the program as a user.
