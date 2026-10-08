@@ -10,6 +10,8 @@ AGENT_DIR="${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}"
 mkdir -p "$AGENT_DIR/agents" "$AGENT_DIR/skills/rpp"
 cp "$HERE"/agents/rpp-*.md "$AGENT_DIR/agents/"
 cp "$HERE/skills/rpp/SKILL.md" "$AGENT_DIR/skills/rpp/SKILL.md"
+# rpp-feedback edits the installed pipeline and syncs it back to this repo, so it needs both paths.
+sed -i -e "s|__RPP_SOURCE__|$HERE|" -e "s|__AGENT_DIR__|$AGENT_DIR|" "$AGENT_DIR/agents/rpp-feedback.md"
 
 INTERACTIVE=0
 [ -t 0 ] && INTERACTIVE=1
@@ -40,4 +42,4 @@ done
 echo
 echo "Installed to $AGENT_DIR. Models in use:"
 grep -H '^model:\|^thinkingLevel:' "$AGENT_DIR"/agents/rpp-*.md | sed "s#$AGENT_DIR/agents/##"
-echo "Check: start omp, then run /agents and confirm nine rpp-* agents are listed."
+echo "Check: start omp, then run /agents and confirm ten rpp-* agents are listed."

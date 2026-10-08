@@ -1,6 +1,6 @@
 ---
 name: rpp
-description: Run the Robust Pipeline Project (RPP) on a git repo. Plans, implements, verifies, runs four parallel review agents, merges, and opens a pull request for a feature prompt. Use when the user asks to run RPP or the pipeline on a repo, or gives a feature to build with it.
+description: Run the Robust Pipeline Project (RPP) on a git repo. Plans, implements, verifies, runs four parallel review agents, merges, opens a pull request for a feature prompt, then learns from the run. Use when the user asks to run RPP or the pipeline on a repo, or gives a feature to build with it.
 ---
 
 # RPP supervisor
@@ -25,6 +25,7 @@ mean: continue the run in the state file instead of starting a new one.
 6. Use the tools `telegram_ask` (questions) and `telegram_send` (final summary) when they exist.
    Otherwise use `ask` and normal replies.
 7. Never start an agent that runs at High effort without the user's approval (see "High-effort gate").
+   Exception: `rpp-feedback` in Stage 6. The user approved it for every run when they added the stage.
 
 ## Preflight
 1. `git -C <repo> status --porcelain` must be empty. `gh auth status` must pass.
@@ -37,13 +38,18 @@ mean: continue the run in the state file instead of starting a new one.
    - REPORTS: `<RUN_DIR>/reports`. WT_ROOT: `<repo>/../.rpp-wt-<SLUG>`.
 3. `mkdir -p <REPORTS>`. Create the branch: `git -C <repo> checkout -b <FEATURE>`.
 4. Write `<RUN_DIR>/state.md` with: prompt, repo, MAIN_BRANCH, FEATURE, RUN_DIR, current stage.
-   Update the "current stage" line after every stage. On `resume`, read this file first
-   (latest run directory in `<repo>/.git/rpp/`) and continue from the recorded stage.
+   Update the "current stage" line after every stage. Also append one log line per event to a `## Log`
+   section, with a UTC time from `date -u +%FT%TZ`: each stage start and end, each verify verdict and round,
+   each STATUS: BLOCKED (agent and problem in one line), and each user answer. Stage 6 reads this log.
+   On `resume`, read this file first (latest run directory in `<repo>/.git/rpp/`) and continue from the
+   recorded stage.
 
 ## Common task context
 Every `task` call needs a shared `context`. Put these lines in it every time:
 REPO, MAIN_BRANCH, FEATURE, REPORTS (absolute paths), the feature prompt, and
 "Read PLAN.md in REPO first. Write your report to the REPORT PATH given in your task."
+If `<repo>/.git/rpp/lessons.md` exists, also add: "Read LESSONS: <repo>/.git/rpp/lessons.md. It lists what
+earlier runs learned about this repo."
 
 ## Stage 1: Plan
 `task` agent `rpp-planner`, name `planner`. Task text: the feature prompt, and
@@ -92,11 +98,22 @@ in one `ask` if you can. Stage 4 is complete only when all four reports end with
 and worktrees, REPORTS. The integrator writes `<REPORTS>/summary.md` and `<REPORTS>/integrator.md`.
 If `integrator.md` ends with `STATUS: BLOCKED`, treat it as a blocker for the user.
 When it ends with `STATUS: DONE`: read `summary.md`, send it to the user (`telegram_send` when available)
-with the PR link, and update state.md to `done`.
+with the PR link. Then go to Stage 6.
+
+## Stage 6: Feedback
+Run this stage after Stage 5 is done, and also after the user aborts a run that finished Stage 1.
+`task` agent `rpp-feedback`, name `feedback`. Task text: REPO, RUN_DIR, REPORTS, FEATURE, MAIN_BRANCH,
+the outcome (`done` or `aborted`), the PR URL if there is one, and `REPORT PATH: <REPORTS>/feedback.md`.
+Do not use the common task context: this agent does not read PLAN.md first.
+This stage cannot block the run. Do not ask the user about it, and do not start it again.
+When it finishes, send the user one short message: the agent's 3-line summary. If it reports
+`STATUS: BLOCKED` or produces no report, say that in one sentence and give the report path.
+Then update state.md to `done` (or `aborted`).
 
 ## High-effort gate
 Before you start any agent whose `thinkingLevel` is `high`, ask the user first. Today only
-`rpp-security-high` is at that level. Check with `/agents` if you are not sure.
+`rpp-security-high` needs this. `rpp-feedback` is also High, but it is pre-approved (Rule 7).
+Check with `/agents` if you are not sure.
 1. Ask with `telegram_ask` (or `ask`). State: the agent name, its model and effort, why it is needed
    (what failed at medium effort, in 2 sentences), and that High effort costs more.
 2. Give these options, recommendation first:
@@ -106,7 +123,7 @@ Before you start any agent whose `thinkingLevel` is `high`, ask the user first. 
 3. Wait for the answer. Do not use a timeout. Do not start the agent without a clear yes.
 4. A yes covers that one spawn only. Ask again before any later High-effort spawn.
 5. If the user skips it, treat the original `STATUS: BLOCKED` report as a blocker for the user
-   (see "Blockers"). If the user aborts, stop the run.
+   (see "Blockers"). If the user aborts, run Stage 6, then stop the run.
 
 ## Blockers
 A blocker is a `STATUS: BLOCKED` report that survived the agent's two attempts (and, for security,
@@ -116,7 +133,8 @@ the approved High pass, or the user declining it). Never ask about anything else
    and give 2 to 4 options, with your recommendation first. Add a free-text option for other direction.
 3. Start the same agent type again (new `task`, same BRANCH and WORKTREE for stage 4 agents) with:
    `USER DIRECTION: <answer>` and `PREVIOUS REPORT: <report path>`.
-4. If the user answers `abort`, stop the run. Say what state the repo and branches are in.
+4. If the user answers `abort`, run Stage 6 if Stage 1 finished, then stop the run.
+   Say what state the repo and branches are in.
 5. Repeat until every agent is DONE.
 
 ## If something goes wrong

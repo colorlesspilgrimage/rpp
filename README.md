@@ -2,15 +2,16 @@
 
 RPP turns a one-line feature request into a reviewed pull request. You give it a repo and a feature prompt.
 A supervisor agent then runs a fixed pipeline of specialist agents: plan, implement, verify, four parallel
-reviews, then merge and PR. You are only asked a question when an agent is stuck.
+reviews, merge and PR, then a feedback stage that improves the pipeline itself. You are only asked a question when an agent is stuck.
 
 This repo contains the pieces for OMP and an installer:
 
 | Path | What it is |
 | --- | --- |
 | `skills/rpp/SKILL.md` | The `rpp` skill. It is the **supervisor**: it runs the stages, checks reports, and talks to you. It never writes feature code. |
-| `agents/rpp-*.md` | Nine specialist agents, one per job (see below). |
+| `agents/rpp-*.md` | Ten specialist agents, one per job (see below). |
 | `install.sh` | Copies the skill and agents into `~/.omp/agent/`. |
+| `sync-back.sh` | Copies installed pipeline files back into this repo, keeping the default models. Used by `rpp-feedback`. |
 
 ## Why a pipeline
 
@@ -32,7 +33,7 @@ One agent that plans, codes, tests, and reviews its own work tends to trust itse
 - `tmux` (recommended, so a run survives a closed terminal).
 
 **Model access.** The agents use these models by default. Check yours with `omp --list-models`.
-- `anthropic/claude-opus-5-5`: auditor, security, security-high, integrator.
+- `anthropic/claude-opus-5-5`: auditor, security, security-high, integrator, feedback.
 - `anthropic/claude-sonnet-5-5`: planner, verifier.
 - `xai-oauth/grok-4.7`: implementer, locreducer, commentcleaner.
 
@@ -52,7 +53,7 @@ questions and sends the final summary through Telegram. Without it, it uses norm
 ./install.sh
 ```
 
-The installer copies the nine agents to `~/.omp/agent/agents/` and the skill to `~/.omp/agent/skills/rpp/`.
+The installer copies the ten agents to `~/.omp/agent/agents/` and the skill to `~/.omp/agent/skills/rpp/`.
 It then asks which model each agent should use. The default is shown in brackets. Press Enter to keep it:
 
 ```
@@ -64,7 +65,7 @@ rpp-implementer
 Run `omp --list-models` to see valid ids. Without a terminal (piped input or CI), every agent keeps its default.
 Set `PI_CODING_AGENT_DIR` to install somewhere else. The installer prints the models in use afterwards. Re-run it any time to update or change models.
 
-Verify: start `omp`, run `/agents`, and confirm nine `rpp-*` agents are listed with the models you expect.
+Verify: start `omp`, run `/agents`, and confirm ten `rpp-*` agents are listed with the models you expect.
 
 ### OMP settings to check
 
@@ -107,8 +108,8 @@ file and continues from the recorded stage.
 ## How the pipeline runs
 
 ```
- preflight ─► 1 Plan ─► 2 Implement ─► 3 Verify ─┬─ PASS ─► 4 Review x4 (parallel) ─► 5 Integrate ─► PR
-                              ▲                  │                                        
+ preflight ─► 1 Plan ─► 2 Implement ─► 3 Verify ─┬─ PASS ─► 4 Review x4 (parallel) ─► 5 Integrate ─► PR ─► 6 Feedback
+                              ▲                  │
                               └──── FAIL ◄───────┘ (one automatic retry, then ask you)
 ```
 
@@ -149,6 +150,20 @@ suite and the manual check, and deletes the pipeline files from the repo (`PLAN*
 worktrees (the review branches are kept), and writes `summary.md`. The supervisor sends you that summary
 and the PR link.
 
+**6. Feedback: `rpp-feedback`** (Opus, High effort). Runs after the PR is open, and after an aborted run that
+got past planning. It reads `state.md` (the supervisor logs stage times, verify rounds, blockers, and your
+answers there) and every report, and looks for waste, escaped defects, and avoidable questions. It then:
+
+- Makes at most three small, evidence-backed edits to the installed pipeline (`~/.omp/agent/`). It cannot
+  change models or effort levels, add or remove stages, weaken the safety rules, or edit itself.
+- If it changed anything, runs `sync-back.sh` to copy the changes into this repo, commits them as
+  `feedback: ...`, and pushes to `origin main`. It does nothing if this checkout is dirty or not on `main`.
+- Keeps cross-repo lessons in a marked block of global memory, `~/.omp/agent/AGENTS.md`, which every OMP
+  session loads. Lessons about one repo go in `<repo>/.git/rpp/lessons.md`, which later runs on that repo read.
+
+It writes `feedback.md` and you get one short message about what changed. It never blocks or asks you
+anything. The installer writes this repo's path into the agent, so re-run `install.sh` if you move the repo.
+
 ### Blockers
 
 Agents cannot ask you anything. Each agent gets two attempts at a problem: if the first approach fails it
@@ -161,7 +176,8 @@ You get no progress messages.
 
 The supervisor never starts a High-effort agent without a clear yes from you. It tells you the agent,
 the model, why it is needed, and that it costs more. Your yes covers exactly one run. Today only
-`rpp-security-high` is at this level; planner and integrator run at medium.
+`rpp-security-high` needs it. `rpp-feedback` also runs at High, but you approve it once for all runs by
+installing it. Planner and integrator run at medium.
 
 ### Report convention
 
@@ -172,7 +188,7 @@ The supervisor reads only those last lines and the reports, which keeps its cont
 ## Notes and guarantees
 
 - The supervisor never edits feature code, never merges or pushes itself, never deletes branches, and never
-  force-pushes. Only the integrator pushes.
+  force-pushes. Only the integrator pushes to the target repo. Only `rpp-feedback` pushes to this repo.
 - Agents write documents, reports, comments, and commit messages in
   [ASD-STE100](https://www.asd-ste100.org/) (Simplified Technical English). The integrator's summary is exempt.
 - State and reports are in `<repo>/.git/rpp/<run>/`. Worktrees are in `../.rpp-wt-<slug>/` and the integrator
