@@ -94,20 +94,32 @@ omp plugin install omp-telegram
 
 ## Run
 
-Start the supervisor on a cheap model, ideally inside tmux. The supervisor does no heavy work.
+Start the supervisor on a cheap model, ideally inside tmux. The supervisor does no heavy work. Set the effort
+level yourself: OMP defaults to high effort, which costs more than the supervisor needs. The pipeline agents
+always use their own installed models and effort levels.
 
 ```sh
 tmux new -s rpp
-omp --model anthropic/claude-sonnet-5-5:low
+cd ~/code/myrepo
+rpp-omp        # same as: omp --model anthropic/claude-sonnet-5-5:low
 ```
 
-Then, in the terminal or via the Telegram bot:
+`install.sh` offers to add the `rpp-omp` alias to `~/.bashrc` or `~/.zshrc` when you run it in a terminal.
+For other shells, add the equivalent of `alias rpp-omp='omp --model anthropic/claude-sonnet-5-5:low'` yourself.
+
+Then run the skill with your feature prompt. The repo defaults to the current directory:
+
+```
+/skill:rpp add CSV export to the report command
+```
+
+Plain language also works, and is useful from the Telegram bot or to name another repo:
 
 ```
 Run the rpp skill on ~/code/myrepo: add CSV export to the report command
 ```
 
-To continue after a crash, run `Run the rpp skill resume` in the same repo. The supervisor reads its state
+To continue after a crash, run `/skill:rpp resume` in the same repo. The supervisor reads its state
 file and continues from the recorded stage.
 
 ## How the pipeline runs

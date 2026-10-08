@@ -65,3 +65,25 @@ echo
 echo "Installed to $AGENT_DIR. Models in use:"
 grep -H '^model:\|^thinkingLevel:' "$AGENT_DIR"/agents/rpp-*.md | sed "s#$AGENT_DIR/agents/##"
 echo "Check: start omp, then run /agents and confirm ten rpp-* agents are listed."
+
+# Offers the rpp-omp alias, which starts the supervisor on a cheap model. Only asks in a terminal, so
+# rpp-feedback and CI never change shell config.
+ALIAS_LINE="alias rpp-omp='omp --model anthropic/claude-sonnet-5-5:low'"
+case "$(basename "${SHELL:-}")" in
+  bash) RC="$HOME/.bashrc" ;;
+  zsh) RC="${ZDOTDIR:-$HOME}/.zshrc" ;;
+  *) RC="" ;;
+esac
+if [ -n "$RC" ] && grep -qF "alias rpp-omp=" "$RC" 2>/dev/null; then
+  echo "Alias rpp-omp is already in $RC."
+elif [ "$INTERACTIVE" = 1 ] && [ -n "$RC" ]; then
+  printf '\nAdd the alias rpp-omp (starts the supervisor on Sonnet at low effort) to %s? [Y/n]: ' "$RC"
+  read -r answer || answer="n"
+  case "$answer" in
+    ""|[Yy]*) printf '\n# RPP supervisor: Sonnet at low effort (the pipeline agents use their own installed models)\n%s\n' "$ALIAS_LINE" >> "$RC"
+              echo "Added. Open a new shell or run: source $RC" ;;
+    *) echo "Skipped." ;;
+  esac
+else
+  echo "Optional: add this alias to your shell config to start the supervisor: $ALIAS_LINE"
+fi
