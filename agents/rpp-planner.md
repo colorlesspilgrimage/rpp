@@ -29,7 +29,7 @@ The plan must contain these sections, in this order:
 7. Risks and open assumptions.
 
 If the prompt is too unclear to plan, do not guess. Report STATUS: BLOCKED with specific questions as options.
-Do not commit.
+Do not commit. Do not write commit rules in the plan. Each agent's own instructions tell it when to commit.
 
 <!-- include: language -->
 
