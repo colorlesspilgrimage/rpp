@@ -36,18 +36,22 @@ mean: continue the run in the state file instead of starting a new one.
    - MAIN_BRANCH: `main` unless the repo uses another default branch.
    - FEATURE: `feat/<SLUG>-<MMDD-HHMM>`.
    - RUN_DIR: `<repo>/.git/rpp/<SLUG>-<MMDD-HHMM>` (inside .git, so it never enters a commit).
-   - PLAN: `<RUN_DIR>/PLAN.md`. REPORTS: `<RUN_DIR>/reports`. WT_ROOT: `<repo>/../.rpp-wt-<SLUG>`.
+   - PLAN: `<RUN_DIR>/PLAN.md`. REPORTS: `<RUN_DIR>/reports`.
+   - WT_ROOT: the absolute path of `<repo>/../.rpp-wt-<SLUG>` with no `..` part (use `realpath -m`).
 3. `mkdir -p <REPORTS>`. Create the branch: `git -C <repo> checkout -b <FEATURE>`.
 4. Write `<RUN_DIR>/state.md` (see "State file").
 
 ## State file
 `<RUN_DIR>/state.md` has three parts:
-- Header: prompt, repo, MAIN_BRANCH, FEATURE, RUN_DIR, current stage, verify round.
+- Header: prompt, repo, MAIN_BRANCH, FEATURE, RUN_DIR, WT_ROOT, current stage, verify round.
 - `## Agents`: one line per agent run in the current stage: `<name>: running | done | blocked`.
   Write `running` before you start an agent and the result after it finishes.
 - `## Log`: one line per event, with a UTC time from `date -u +%FT%TZ`: each stage start and end, each verify
   verdict and round, each STATUS: BLOCKED (agent and problem in one line), and each user answer. Stage 8 reads it.
-Update the header and `## Agents` after every stage and agent.
+Update the header and `## Agents` after every stage and agent. Change those lines in place
+(for example `sed -i 's/^stage: .*/stage: 4 (review)/' state.md`). At a new stage, replace the `## Agents` lines.
+`## Log` is the last part of the file: append only log lines with `>>`.
+Log a verdict as `verify <N>: PASS` or `verify <N>: FAIL`.
 
 On `resume`: read the state file of the latest run directory in `<repo>/.git/rpp/` and continue at the recorded
 stage. In that stage, do not start agents marked `done` again. Reuse existing branches and worktrees.
@@ -62,6 +66,7 @@ earlier runs learned about this repo."
 
 ## Worktree setup
 Do this for each worktree agent before you start it. BRANCH = `<FEATURE>-<name>`, WORKTREE = `<WT_ROOT>/<name>`.
+Put this exact WORKTREE path in the agent's task text. Never write a placeholder path.
 1. If WORKTREE does not exist: `git -C <repo> worktree add -b <BRANCH> <WORKTREE> <FEATURE>`
    (without `-b` if BRANCH exists).
 2. Read the `SHARED DEPENDENCY DIRECTORIES:` line in PLAN. For each directory D that exists in `<repo>` and not
@@ -166,4 +171,6 @@ the approved High pass, or the user declining it; for the integrator, the escala
 ## If something goes wrong
 - A `task` call fails or an agent produces no report: treat it as `STATUS: BLOCKED` with the error as the
   problem statement.
+- A task text was wrong after the agent started: send the correction with `write agent://<name>` to that agent only.
+  Never write to `agent://all`. It wakes agents that are done.
 - Never merge or push yourself. Never delete branches. Never force-push.
