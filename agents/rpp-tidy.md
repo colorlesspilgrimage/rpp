@@ -1,7 +1,7 @@
 ---
 name: rpp-tidy
 description: RPP stage 6. Runs after the review fixes are merged. Moves repeated code into shared functions and cleans up comments, with no behavior change.
-model: xai-oauth/grok-4.7
+model: anthropic/claude-haiku-5-5
 thinkingLevel: medium
 ---
 

@@ -36,8 +36,8 @@ One agent that plans, codes, tests, and reviews its own work tends to trust itse
 
 **Model access.** The agents use these models by default. Check yours with `omp --list-models`.
 - `anthropic/claude-opus-5-5`: auditor, security, security-high, integrator-escalation, feedback.
-- `anthropic/claude-sonnet-5-5`: planner, verifier, integrator.
-- `xai-oauth/grok-4.7`: implementer, tidy.
+- `anthropic/claude-sonnet-5-5`: planner, implementer, verifier, integrator, ci-fixer.
+- `anthropic/claude-haiku-5-5`: tidy.
 
 The installer lets you pick a model for each agent (see [Install](#install)).
 
@@ -61,7 +61,7 @@ It then asks which model each agent should use. The default is shown in brackets
 ```
 rpp-implementer
   RPP stage 2. Reads PLAN.md in a fresh context, then implements the feature and its tests exactly as planned.
-  model [xai-oauth/grok-4.7]:
+  model [anthropic/claude-sonnet-5-5]:
 ```
 
 Run `omp --list-models` to see valid ids. Choices that differ from the default are saved in
@@ -144,7 +144,7 @@ implementation steps, tests, acceptance criteria, a manual check script, and ris
 prompt is too vague, it blocks with specific questions rather than guessing. The repo context includes labeled
 `SETUP`, `FAST TEST` (only the feature's tests), `FULL TEST`, and `SHARED DEPENDENCY DIRECTORIES` lines.
 
-**2. Implement: `rpp-implementer`** (Grok). Starts with no context except `PLAN.md`. Implements the feature and
+**2. Implement: `rpp-implementer`** (Sonnet). Starts with no context except `PLAN.md`. Implements the feature and
 its tests, runs the tests, and commits.
 
 **3. Verify: `rpp-verifier`** (Sonnet). Works in a fresh context and fixes nothing. It diffs against the main
@@ -170,7 +170,7 @@ If `rpp-security` cannot patch a flaw, the supervisor asks you before running `r
 feature branch with `--no-ff` (security fixes win conflicts, every regression test is kept), re-runs the full
 suite and the manual check, and fixes regressions. It does not push.
 
-**6. Tidy: `rpp-tidy`** (Grok). Works on the merged result, so the review fixes get tidied too. It moves
+**6. Tidy: `rpp-tidy`** (Haiku). Works on the merged result, so the review fixes get tidied too. It moves
 repeated code into shared functions and removes or shortens wrong, redundant, or verbose comments, keeping the
 ones that explain *why*. No behavior change: it undoes any change that breaks a test or hurts readability.
 

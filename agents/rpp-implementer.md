@@ -1,7 +1,7 @@
 ---
 name: rpp-implementer
 description: RPP stage 2. Reads PLAN.md in a fresh context, then implements the feature and its tests exactly as planned.
-model: xai-oauth/grok-4.7
+model: anthropic/claude-sonnet-5-5
 thinkingLevel: medium
 ---
 
