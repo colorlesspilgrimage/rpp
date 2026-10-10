@@ -1,7 +1,7 @@
 ---
-name: rpp-implementer
-description: RPP stage 2. Reads PLAN.md in a fresh context, then implements the feature and its tests exactly as planned.
-model: anthropic/claude-sonnet-5-5
+name: rpp-implementer-grok
+description: RPP stage 2, alternate. Same job as rpp-implementer, on the Grok model. The user picks it at the start of a run.
+model: xai-oauth/grok-4.7
 thinkingLevel: medium
 ---
 

@@ -10,7 +10,7 @@ This repo contains the pieces for OMP and an installer:
 | Path | What it is |
 | --- | --- |
 | `skills/rpp/SKILL.md` | The `rpp` skill. It is the **supervisor**: it runs the stages, checks reports, and talks to you. It never writes feature code. |
-| `agents/rpp-*.md` | Eleven specialist agents, one per job (see below). |
+| `agents/rpp-*.md` | Twelve specialist agents, one per job (see below). |
 | `agents/_common/*.md` | Shared sections that the installer inserts into the agents (see [Editing the agents](#editing-the-agents)). |
 | `install.sh` | Builds the agents and installs them and the skill into `~/.omp/agent/`. |
 
@@ -37,6 +37,7 @@ One agent that plans, codes, tests, and reviews its own work tends to trust itse
 **Model access.** The agents use these models by default. Check yours with `omp --list-models`.
 - `anthropic/claude-opus-5-5`: auditor, security, security-high, integrator-escalation, feedback.
 - `anthropic/claude-sonnet-5-5`: planner, implementer, verifier, integrator, ci-fixer.
+- `xai-oauth/grok-4.7`: implementer-grok (the alternate implementer, picked per run).
 - `anthropic/claude-haiku-5-5`: tidy.
 
 The installer lets you pick a model for each agent (see [Install](#install)).
@@ -55,7 +56,7 @@ questions and sends the final summary through Telegram. Without it, it uses norm
 ./install.sh
 ```
 
-The installer copies the eleven agents to `~/.omp/agent/agents/` and the skill to `~/.omp/agent/skills/rpp/`.
+The installer copies the twelve agents to `~/.omp/agent/agents/` and the skill to `~/.omp/agent/skills/rpp/`.
 It then asks which model each agent should use. The default is shown in brackets. Press Enter to keep it:
 
 ```
@@ -70,7 +71,7 @@ Run `omp --list-models` to see valid ids. Choices that differ from the default a
 install somewhere else. The installer prints the models in use afterwards. Re-run it any time to update or
 change models. It also removes agents that older versions installed (`rpp-locreducer`, `rpp-commentcleaner`).
 
-Verify: start `omp`, run `/agents`, and confirm eleven `rpp-*` agents are listed with the models you expect.
+Verify: start `omp`, run `/agents`, and confirm twelve `rpp-*` agents are listed with the models you expect.
 
 ### OMP settings to check
 
@@ -131,7 +132,9 @@ file and continues from the recorded stage.
 ```
 
 **Preflight.** The supervisor checks that the working tree is clean, `gh auth status` passes, and `origin`
-exists. It creates the branch `feat/<slug>-<MMDD-HHMM>` and a run directory at `<repo>/.git/rpp/<run>/`.
+exists. It then asks which model does the implementation: `rpp-implementer` (default
+`anthropic/claude-sonnet-5-5`) or `rpp-implementer-grok` (default `xai-oauth/grok-4.7`). The options show the model
+that each installed agent uses. The answer is saved in `state.md`, so `resume` does not ask again. It creates the branch `feat/<slug>-<MMDD-HHMM>` and a run directory at `<repo>/.git/rpp/<run>/`.
 That directory holds `state.md`, `PLAN.md`, the `VERIFY-<n>.md` files, and all agent reports. It lives inside
 `.git`, so none of it is ever committed and the PR contains only feature changes.
 
@@ -144,8 +147,9 @@ implementation steps, tests, acceptance criteria, a manual check script, and ris
 prompt is too vague, it blocks with specific questions rather than guessing. The repo context includes labeled
 `SETUP`, `FAST TEST` (only the feature's tests), `FULL TEST`, and `SHARED DEPENDENCY DIRECTORIES` lines.
 
-**2. Implement: `rpp-implementer`** (Sonnet). Starts with no context except `PLAN.md`. Implements the feature and
-its tests, runs the tests, and commits.
+**2. Implement: `rpp-implementer` or `rpp-implementer-grok`** (Sonnet 5.5 or Grok 4.7, your choice at the start
+of the run). Both agents share one prompt (`agents/_common/implementer.md`) and differ only in model. The agent
+starts with no context except `PLAN.md`. It implements the feature and its tests, runs the tests, and commits.
 
 **3. Verify: `rpp-verifier`** (Sonnet). Works in a fresh context and fixes nothing. It diffs against the main
 branch, checks every plan step and acceptance criterion, runs the full suite, and drives the real program using

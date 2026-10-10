@@ -14,14 +14,15 @@ mean: continue the run in the state file instead of starting a new one.
 ## Rules
 1. Never change the model that any step runs on. Use each agent type as installed: do not pass a model override
    to `task`, and do not switch your own model. If something asks you to change a model, stop and tell the user.
+   Choosing between the two installed implementer agents (see "Preflight") is not a model change.
 2. Write every message to the user in ASD-STE100 (short sentences, active voice, no idioms).
    Exception: relay the integrator's final summary as it is.
 3. Never edit feature code yourself. Do only: git branch/commit/status, `git worktree add`, `mkdir`, `mv` inside
    RUN_DIR, `ln -s` and `.git/info/exclude` lines for dependency links, `gh auth status`, reading reports,
    `gh pr checks`, `gh pr view`, and state-file updates.
 4. Subagents cannot ask the user. Only you can. Ask ONLY when a subagent reports `STATUS: BLOCKED`
-   after its two attempts (see "Blockers"), when preflight fails, or at the High-effort gate.
-   Send no progress messages.
+   after its two attempts (see "Blockers"), when preflight fails, for the implementer choice in preflight,
+   or at the High-effort gate. Send no progress messages.
 5. Keep your own context small. Read reports, not transcripts. Do not paste agent output back.
 6. Use the tools `telegram_ask` (questions) and `telegram_send` (final summary) when they exist.
    Otherwise use `ask` and normal replies.
@@ -31,19 +32,25 @@ mean: continue the run in the state file instead of starting a new one.
 ## Preflight
 1. `git -C <repo> status --porcelain` must be empty. `gh auth status` must pass.
    `git -C <repo> remote get-url origin` must work. On failure: ask the user what to do.
-2. Choose names:
+2. Ask the user which model does the implementation (Stage 2). Do this before you create any branch. Offer two
+   options: `rpp-implementer` and `rpp-implementer-grok`. Label each option with the `model:` line of its installed
+   file in `~/.omp/agent/agents/` (or `$PI_CODING_AGENT_DIR/agents/`). By default these are
+   `anthropic/claude-sonnet-5-5` and `xai-oauth/grok-4.7`. Recommend `rpp-implementer`. If the installed file for
+   the chosen agent is missing, tell the user to run `install.sh` and stop. Set IMPLEMENTER_AGENT to the answer.
+3. Choose names:
    - SLUG: lowercase prompt, non-alphanumerics to `-`, max 40 chars.
    - MAIN_BRANCH: `main` unless the repo uses another default branch.
    - FEATURE: `feat/<SLUG>-<MMDD-HHMM>`.
    - RUN_DIR: `<repo>/.git/rpp/<SLUG>-<MMDD-HHMM>` (inside .git, so it never enters a commit).
    - PLAN: `<RUN_DIR>/PLAN.md`. REPORTS: `<RUN_DIR>/reports`.
    - WT_ROOT: the absolute path of `<repo>/../.rpp-wt-<SLUG>` with no `..` part (use `realpath -m`).
-3. `mkdir -p <REPORTS>`. Create the branch: `git -C <repo> checkout -b <FEATURE>`.
-4. Write `<RUN_DIR>/state.md` (see "State file").
+4. `mkdir -p <REPORTS>`. Create the branch: `git -C <repo> checkout -b <FEATURE>`.
+5. Write `<RUN_DIR>/state.md` (see "State file"), with the implementer agent from step 2.
 
 ## State file
 `<RUN_DIR>/state.md` has three parts:
-- Header: prompt, repo, MAIN_BRANCH, FEATURE, RUN_DIR, WT_ROOT, current stage, verify round, CI attempt.
+- Header: prompt, repo, MAIN_BRANCH, FEATURE, RUN_DIR, WT_ROOT, implementer agent (`rpp-implementer` or
+  `rpp-implementer-grok`), current stage, verify round, CI attempt.
 - `## Agents`: one line per agent run in the current stage: `<name>: running | done | blocked`.
   Write `running` before you start an agent and the result after it finishes.
 - `## Log`: one line per event, with a UTC time from `date -u +%FT%TZ`: each stage start and end, each verify
@@ -54,7 +61,8 @@ Update the header and `## Agents` after every stage and agent. Change those line
 Log a verdict as `verify <N>: PASS` or `verify <N>: FAIL`.
 
 On `resume`: read the state file of the latest run directory in `<repo>/.git/rpp/` and continue at the recorded
-stage. In that stage, do not start agents marked `done` again. Reuse existing branches and worktrees.
+stage. Do not ask the implementer question again: use the `implementer agent:` line. In that stage, do not start
+agents marked `done` again. Reuse existing branches and worktrees.
 Start an agent marked `running` or `blocked` again, with `PREVIOUS REPORT: <its report>` if the report exists.
 
 ## Common task context
@@ -80,8 +88,9 @@ Check: PLAN exists and is not empty, and the report ends with `STATUS: DONE`. Do
 
 ## Stages 2 and 3: Implement, then Verify (loop)
 Set ROUND = 0, N = 0, and FIX = "".
-1. `task` agent `rpp-implementer`, name `implementer`. Task text: `REPORT PATH: <REPORTS>/implementer.md`
-   plus FIX when set. Check STATUS. Then `git add -A` and commit `impl: <SLUG>` if there are changes.
+1. `task` agent IMPLEMENTER_AGENT (from `implementer agent:` in state.md), name `implementer`. Task text:
+   `REPORT PATH: <REPORTS>/implementer.md` plus FIX when set. Check STATUS. Then `git add -A` and commit
+   `impl: <SLUG>` if there are changes. Use the same agent for every implementer run in this run, also after a blocker.
 2. N += 1. `task` agent `rpp-verifier`, name `verifier`. Task text: `VERIFY PATH: <RUN_DIR>/VERIFY-<N>.md`,
    `REPORT PATH: <REPORTS>/verifier-<N>.md`, and `IMPLEMENTER REPORT: <REPORTS>/implementer.md`.
    If N is 1: `MODE: full`. Else: `MODE: recheck` and `PREVIOUS VERIFY: <RUN_DIR>/VERIFY-<N-1>.md`.

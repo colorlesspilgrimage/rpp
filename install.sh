@@ -64,7 +64,7 @@ sed -i -e "s|__RPP_SOURCE__|$HERE|" -e "s|__AGENT_DIR__|$AGENT_DIR|" "$AGENT_DIR
 echo
 echo "Installed to $AGENT_DIR. Models in use:"
 grep -H '^model:\|^thinkingLevel:' "$AGENT_DIR"/agents/rpp-*.md | sed "s#$AGENT_DIR/agents/##"
-echo "Check: start omp, then run /agents and confirm eleven rpp-* agents are listed."
+echo "Check: start omp, then run /agents and confirm twelve rpp-* agents are listed."
 
 # Offers the rpp-omp alias, which starts the supervisor on a cheap model. Only asks in a terminal, so
 # rpp-feedback and CI never change shell config.
