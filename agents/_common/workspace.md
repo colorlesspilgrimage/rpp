@@ -8,5 +8,9 @@ Your task gives FEATURE_BRANCH, BRANCH, and WORKTREE. The supervisor creates WOR
 3. Never change files in the main checkout. Never change other agents' worktrees.
 4. The supervisor links the dependency directories that PLAN lists. If the tests cannot find dependencies,
    run the PLAN SETUP command once in WORKTREE. Never commit dependency directories or links to them.
+   A linked directory can hold files that a tool generated for the main checkout (for example type paths).
+   If a check fails only in WORKTREE and the errors point at such files, it is a link artifact. It is not a
+   code defect and not a pre-existing failure. Do not try to fix it. Write it in your report. The integrator
+   runs the check in the main checkout.
 5. Scope: only files this feature changed. Find them with `git diff --name-only <MAIN_BRANCH>...<FEATURE_BRANCH>`.
 6. Commit your work on BRANCH when you finish.

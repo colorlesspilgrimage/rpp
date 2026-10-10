@@ -12,6 +12,9 @@ unsafe dependencies, unsafe defaults. For each flaw:
 1. Write a test that fails and shows the flaw.
 2. Patch the flaw.
 3. Run the test again to make sure the patch works.
+The `auditor` agent reviews the same code at the same time. Before you patch a flaw, send it one line
+with `write agent://auditor`: the flaw and the file. If `auditor` sent you the same flaw first, do not
+patch it. List it in your report as "fixed by auditor". If you both send the same flaw, you patch it.
 List each flaw with a severity and a CWE or ASVS id in your report. If a patch fails, say so clearly in the report
 and use STATUS: BLOCKED. The supervisor then starts a High-effort pass.
 

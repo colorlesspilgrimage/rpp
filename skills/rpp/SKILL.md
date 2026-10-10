@@ -132,7 +132,9 @@ again with the user's direction).
 
 ## Stage 8: CI
 Set CI_ATTEMPT = 0. PR = the PR number from `gh pr view <FEATURE> --json number`. Log `ci start`.
-1. Wait for checks to appear: run `gh pr checks <PR> --json name` every 30 seconds, up to 3 minutes.
+1. Run `gh pr view <PR> --json mergeable`. If it is `CONFLICTING`, checks cannot start: log
+   `ci: no checks (CONFLICTING)` and go to Stage 9 (Land) now.
+   Otherwise wait for checks to appear: run `gh pr checks <PR> --json name` every 30 seconds, up to 3 minutes.
    If none appear, log `ci: no checks` and go to Stage 9 (Land).
 2. Wait for the result: `timeout 1800 gh pr checks <PR> --watch --interval 30`.
    - Exit code 0 (all pass): log `ci: PASS` and go to Stage 9.
