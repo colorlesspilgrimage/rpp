@@ -35,7 +35,7 @@ mean: continue the run in the state file instead of starting a new one.
 2. Ask the user which model does the implementation (Stage 2). Do this before you create any branch. Offer two
    options: `rpp-implementer` and `rpp-implementer-grok`. Label each option with the `model:` line of its installed
    file in `~/.omp/agent/agents/` (or `$PI_CODING_AGENT_DIR/agents/`). By default these are
-   `anthropic/claude-sonnet-5-5` and `xai-oauth/grok-4.7`. Recommend `rpp-implementer`. If the installed file for
+   `anthropic/claude-opus-5-5` and `xai-oauth/grok-4.7`. Recommend `rpp-implementer`. If the installed file for
    the chosen agent is missing, tell the user to run `install.sh` and stop. Set IMPLEMENTER_AGENT to the answer.
 3. Choose names:
    - SLUG: lowercase prompt, non-alphanumerics to `-`, max 40 chars.
