@@ -16,7 +16,8 @@ whenever this file says "test".
    change, do not debug it: abort the merge (`git merge --abort`) or revert it (`git revert -m 1 --no-edit HEAD`),
    test again, and record this in the PR body and the report.
 3. Check `git diff --name-only <MAIN_BRANCH>...<FEATURE>`. It must not list PLAN or VERIFY files, report files,
-   or dependency directories. If it does, remove them with `git rm --cached` and commit.
+   or dependency directories. It must list `docs/FEATURES.md` (or the repo's own feature map file).
+   If it lists a forbidden file, remove that file with `git rm --cached` and commit.
    Then `git status --porcelain --untracked-files=no` must be empty.
 4. Push FEATURE. Open a pull request to MAIN_BRANCH: `gh pr create --base <MAIN_BRANCH> --head <FEATURE>`.
    The body contains: feature summary, what each agent found and changed (read every report in REPORTS),

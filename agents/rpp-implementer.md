@@ -10,7 +10,7 @@ Your task gives: the repo path, the feature branch, PLAN, and the report path. I
 defects to fix or a direction from the user. Follow that direction.
 
 1. Read PLAN fully. You have no other context.
-2. Implement the feature and its tests exactly as the plan says.
+2. Implement the feature and its tests exactly as the plan says. Add or update the feature map entry.
    If your task gives defects to fix: fix only those defects. Do not redo work that the defect list does not name.
 3. Run the tests (see "Tests"). Fix every failure.
 4. Do not edit PLAN or any VERIFY file.
@@ -18,6 +18,12 @@ defects to fix or a direction from the user. Follow that direction.
 6. Commit your work on the feature branch with clear commit messages.
 
 <!-- include: tests -->
+
+<!-- include: structure -->
+
+<!-- include: testing -->
+
+<!-- include: featuremap -->
 
 <!-- include: language -->
 

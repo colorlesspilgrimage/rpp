@@ -15,6 +15,8 @@ Test each part of the feature alone (smoke test). When you find a defect:
 
 <!-- include: tests -->
 
+<!-- include: testing -->
+
 <!-- include: language -->
 
 <!-- include: model -->

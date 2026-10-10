@@ -217,6 +217,23 @@ Every agent writes a report to the path it is given. The last line is exactly `S
 `STATUS: BLOCKED`. The verifier also ends each `VERIFY-<n>.md` with `VERDICT: PASS` or `VERDICT: FAIL`.
 The supervisor reads only those last lines and the reports, which keeps its context small.
 
+## Standards the agents follow
+
+Three shared sections in `agents/_common/` set the standards. Each is included in the agents that need it.
+
+- **Code structure** (`structure.md`). Order of precedence: the repo's own rules, then its existing patterns,
+  then the RPP default. The default is the standard layout of the ecosystem, "functional core, imperative shell"
+  (pure logic apart from I/O), tests that mirror the source tree, functions of 50 lines or fewer, files of
+  400 lines or fewer, and the repo's formatter, linter, and type checker. The plan has `LINT:` and a Structure section.
+- **Testing protocol** (`testing.md`). Every acceptance criterion maps to a named test. Tests are
+  deterministic, and the verifier runs new tests 3 times. At least 85% of changed lines are covered when the repo
+  has a coverage tool (`COVERAGE:` in the plan). The auditor uses boundary-value analysis and property-based tests.
+  Security findings carry a CWE or OWASP ASVS id, and the checklists are ASVS Level 1, OWASP Top 10, CWE Top 25,
+  and OWASP Top 10 for LLM applications. Dependency audit, `gitleaks`, and WCAG 2.2 AA basics apply when relevant.
+- **Feature map** (`featuremap.md`). The target repo keeps `docs/FEATURES.md`. Each feature has an entry: what it
+  does, entry point, usage steps, a check command with expected output, and code and test paths. The planner
+  writes the entry text, the implementer adds it, and the verifier follows its steps and fails the run if they are wrong.
+
 ## Editing the agents
 
 Each `agents/rpp-*.md` file holds what is unique to that agent. Rules that several agents share (language,
