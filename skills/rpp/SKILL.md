@@ -1,6 +1,6 @@
 ---
 name: rpp
-description: Run the Robust Pipeline Project (RPP) on a git repo. Plans, implements, verifies, runs parallel review agents, merges, tidies, opens a pull request for a feature prompt, then learns from the run. Use when the user asks to run RPP or the pipeline on a repo, or gives a feature to build with it.
+description: Run the Robust Pipeline Project (RPP) on a git repo. Plans, implements, verifies, runs parallel review agents, merges, tidies, opens a pull request for a feature prompt, fixes failing CI, then learns from the run. Use when the user asks to run RPP or the pipeline on a repo, or gives a feature to build with it.
 ---
 
 # RPP supervisor
@@ -18,7 +18,7 @@ mean: continue the run in the state file instead of starting a new one.
    Exception: relay the integrator's final summary as it is.
 3. Never edit feature code yourself. Do only: git branch/commit/status, `git worktree add`, `mkdir`, `mv` inside
    RUN_DIR, `ln -s` and `.git/info/exclude` lines for dependency links, `gh auth status`, reading reports,
-   and state-file updates.
+   `gh pr checks`, and state-file updates.
 4. Subagents cannot ask the user. Only you can. Ask ONLY when a subagent reports `STATUS: BLOCKED`
    after its two attempts (see "Blockers"), when preflight fails, or at the High-effort gate.
    Send no progress messages.
@@ -26,7 +26,7 @@ mean: continue the run in the state file instead of starting a new one.
 6. Use the tools `telegram_ask` (questions) and `telegram_send` (final summary) when they exist.
    Otherwise use `ask` and normal replies.
 7. Never start an agent that runs at High effort without the user's approval (see "High-effort gate").
-   Exception: `rpp-feedback` in Stage 8. The user approved it for every run when they added the stage.
+   Exception: `rpp-feedback` in Stage 9. The user approved it for every run when they added the stage.
 
 ## Preflight
 1. `git -C <repo> status --porcelain` must be empty. `gh auth status` must pass.
@@ -43,11 +43,11 @@ mean: continue the run in the state file instead of starting a new one.
 
 ## State file
 `<RUN_DIR>/state.md` has three parts:
-- Header: prompt, repo, MAIN_BRANCH, FEATURE, RUN_DIR, WT_ROOT, current stage, verify round.
+- Header: prompt, repo, MAIN_BRANCH, FEATURE, RUN_DIR, WT_ROOT, current stage, verify round, CI attempt.
 - `## Agents`: one line per agent run in the current stage: `<name>: running | done | blocked`.
   Write `running` before you start an agent and the result after it finishes.
 - `## Log`: one line per event, with a UTC time from `date -u +%FT%TZ`: each stage start and end, each verify
-  verdict and round, each STATUS: BLOCKED (agent and problem in one line), and each user answer. Stage 8 reads it.
+  verdict and round, each STATUS: BLOCKED (agent and problem in one line), and each user answer. Stage 9 reads it.
 Update the header and `## Agents` after every stage and agent. Change those lines in place
 (for example `sed -i 's/^stage: .*/stage: 4 (review)/' state.md`). At a new stage, replace the `## Agents` lines.
 `## Log` is the last part of the file: append only log lines with `>>`.
@@ -130,8 +130,25 @@ ONCE for that stage, name `integrator-escalation`, with the same task text plus
 needs no gate. If it is also BLOCKED, treat it as a blocker for the user (start `rpp-integrator-escalation`
 again with the user's direction).
 
-## Stage 8: Feedback
-Run this stage after Stage 7 is done, and also after the user aborts a run that finished Stage 1.
+## Stage 8: CI
+Set CI_ATTEMPT = 0. PR = the PR number from `gh pr view <FEATURE> --json number`. Log `ci start`.
+1. Wait for checks to appear: run `gh pr checks <PR> --json name` every 30 seconds, up to 3 minutes.
+   If none appear, log `ci: no checks` and go to Stage 9 (Feedback).
+2. Wait for the result: `timeout 1800 gh pr checks <PR> --watch --interval 30`.
+   - Exit code 0 (all pass): log `ci: PASS` and go to Stage 9.
+   - Exit code 1 (a check failed): go to step 3.
+   - Timeout or any other result: log it and ask the user (see "Blockers").
+3. If CI_ATTEMPT is already 10, this is a blocker: the fixer made 10 attempts and CI still fails. Ask the user
+   (see "Blockers"), set CI_ATTEMPT = 0, and put their answer in the next fixer task as `USER DIRECTION`.
+   Otherwise CI_ATTEMPT += 1, update the `ci attempt` line in state.md, and `task` agent `rpp-ci-fixer`, name `ci-fixer`. Task text: the common context, PR,
+   `ATTEMPT: <CI_ATTEMPT>`, `REPORT PATH: <REPORTS>/ci-fixer-<CI_ATTEMPT>.md`, and
+   `PREVIOUS REPORT: <REPORTS>/ci-fixer-<CI_ATTEMPT-1>.md` when it exists.
+   Log `ci attempt <N>: fixed | rerun | BLOCKED` from its report.
+   - `STATUS: DONE`: go back to step 2.
+   - `STATUS: BLOCKED`: blocker for the user (see "Blockers").
+
+## Stage 9: Feedback
+Run this stage after Stage 8 is done, and also after the user aborts a run that finished Stage 1.
 `task` agent `rpp-feedback`, name `feedback`. Task text: REPO, RUN_DIR, REPORTS, FEATURE, MAIN_BRANCH,
 the outcome (`done` or `aborted`), the PR URL if there is one, and `REPORT PATH: <REPORTS>/feedback.md`.
 Do not use the common task context.
@@ -153,7 +170,7 @@ Check with `/agents` if you are not sure.
 3. Wait for the answer. Do not use a timeout. Do not start the agent without a clear yes.
 4. A yes covers that one spawn only. Ask again before any later High-effort spawn.
 5. If the user skips it, treat the original `STATUS: BLOCKED` report as a blocker for the user
-   (see "Blockers"). If the user aborts, run Stage 8, then stop the run.
+   (see "Blockers"). If the user aborts, run Stage 9, then stop the run.
 
 ## Blockers
 A blocker is a `STATUS: BLOCKED` report that survived the agent's two attempts (and, for security,
@@ -164,7 +181,7 @@ the approved High pass, or the user declining it; for the integrator, the escala
    If two agents are blocked at the same time, ask about both in one `ask`.
 3. Start the same agent type again (new `task`, same BRANCH and WORKTREE for worktree agents) with:
    `USER DIRECTION: <answer>` and `PREVIOUS REPORT: <report path>`.
-4. If the user answers `abort`, run Stage 8 if Stage 1 finished, then stop the run.
+4. If the user answers `abort`, run Stage 9 if Stage 1 finished, then stop the run.
    Say what state the repo and branches are in.
 5. Repeat until every agent is DONE.
 
@@ -174,3 +191,4 @@ the approved High pass, or the user declining it; for the integrator, the escala
 - A task text was wrong after the agent started: send the correction with `write agent://<name>` to that agent only.
   Never write to `agent://all`. It wakes agents that are done.
 - Never merge or push yourself. Never delete branches. Never force-push.
+  Only the integrator and `rpp-ci-fixer` push the feature branch.

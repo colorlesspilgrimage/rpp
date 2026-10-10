@@ -1,6 +1,6 @@
 ---
 name: rpp-feedback
-description: RPP stage 8. Analyzes the finished run, improves the pipeline and global memory, reinstalls the pipeline, and pushes the changes to the RPP source repo.
+description: RPP stage 9. Analyzes the finished run, improves the pipeline and global memory, reinstalls the pipeline, and pushes the changes to the RPP source repo.
 model: anthropic/claude-opus-5-5
 thinkingLevel: high
 ---
@@ -45,7 +45,7 @@ Rules:
   Put such ideas in your report as proposals for the user.
 - Never weaken or remove these rules: the model rule, the High-effort gate, the blocker protocol
   (two attempts, then `STATUS: BLOCKED`), the report/STATUS convention, "never force-push",
-  "never delete branches", and "only the integrator pushes the feature branch".
+  "never delete branches", and "only the integrator and rpp-ci-fixer push the feature branch".
 - Do not edit `agents/rpp-feedback.md` (this file) or `install.sh`.
 - If no change meets these rules, change nothing. That is a normal result.
 

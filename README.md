@@ -10,7 +10,7 @@ This repo contains the pieces for OMP and an installer:
 | Path | What it is |
 | --- | --- |
 | `skills/rpp/SKILL.md` | The `rpp` skill. It is the **supervisor**: it runs the stages, checks reports, and talks to you. It never writes feature code. |
-| `agents/rpp-*.md` | Ten specialist agents, one per job (see below). |
+| `agents/rpp-*.md` | Eleven specialist agents, one per job (see below). |
 | `agents/_common/*.md` | Shared sections that the installer inserts into the agents (see [Editing the agents](#editing-the-agents)). |
 | `install.sh` | Builds the agents and installs them and the skill into `~/.omp/agent/`. |
 
@@ -55,7 +55,7 @@ questions and sends the final summary through Telegram. Without it, it uses norm
 ./install.sh
 ```
 
-The installer copies the ten agents to `~/.omp/agent/agents/` and the skill to `~/.omp/agent/skills/rpp/`.
+The installer copies the eleven agents to `~/.omp/agent/agents/` and the skill to `~/.omp/agent/skills/rpp/`.
 It then asks which model each agent should use. The default is shown in brackets. Press Enter to keep it:
 
 ```
@@ -70,7 +70,7 @@ Run `omp --list-models` to see valid ids. Choices that differ from the default a
 install somewhere else. The installer prints the models in use afterwards. Re-run it any time to update or
 change models. It also removes agents that older versions installed (`rpp-locreducer`, `rpp-commentcleaner`).
 
-Verify: start `omp`, run `/agents`, and confirm ten `rpp-*` agents are listed with the models you expect.
+Verify: start `omp`, run `/agents`, and confirm eleven `rpp-*` agents are listed with the models you expect.
 
 ### OMP settings to check
 
@@ -125,7 +125,7 @@ file and continues from the recorded stage.
 ## How the pipeline runs
 
 ```
- preflight ─► 1 Plan ─► 2 Implement ─► 3 Verify ─┬─ PASS ─► 4 Review x2 (parallel) ─► 5 Merge ─► 6 Tidy ─► 7 Finish (PR) ─► 8 Feedback
+ preflight ─► 1 Plan ─► 2 Implement ─► 3 Verify ─┬─ PASS ─► 4 Review x2 (parallel) ─► 5 Merge ─► 6 Tidy ─► 7 Finish (PR) ─► 8 CI loop ─► 9 Feedback
                               ▲                  │
                               └──── FAIL ◄───────┘ (one automatic retry, then ask you)
 ```
@@ -136,7 +136,7 @@ That directory holds `state.md`, `PLAN.md`, the `VERIFY-<n>.md` files, and all a
 `.git`, so none of it is ever committed and the PR contains only feature changes.
 
 `state.md` records the current stage, the status of each agent in it, and a timestamped log of stage times,
-verify rounds, blockers, and your answers. `resume` uses it to skip agents that already finished, and stage 8
+verify rounds, blockers, and your answers. `resume` uses it to skip agents that already finished, and stage 9
 uses the log to find waste.
 
 **1. Plan: `rpp-planner`** (Sonnet). Explores the repo and writes `PLAN.md`: goal, repo context, ordered
@@ -182,7 +182,13 @@ The supervisor sends you that summary and the PR link.
 If the integrator blocks in stage 5 or 7, the supervisor runs `rpp-integrator-escalation` (Opus, medium effort)
 once before it asks you.
 
-**8. Feedback: `rpp-feedback`** (Opus, High effort). Runs after the PR is open, and after an aborted run that
+**8. CI: `rpp-ci-fixer`** (Sonnet). The supervisor waits for the PR checks with `gh pr checks --watch`. If no
+checks appear within 3 minutes, it skips this stage. If a check fails, `rpp-ci-fixer` reads the failed logs and
+decides the cause: a code defect, a CI setup error, or a flaky run. It fixes the first two, reruns the third,
+pushes to the feature branch, and the supervisor waits again. It never skips, disables, or weakens a check. After
+10 fixer attempts, or when the fixer is blocked, the supervisor asks you.
+
+**9. Feedback: `rpp-feedback`** (Opus, High effort). Runs after the PR is open, and after an aborted run that
 got past planning. It reads `state.md`, the plan, the verify files, and every report, and looks for waste,
 escaped defects, and avoidable questions. It then:
 
@@ -244,7 +250,7 @@ Change a shared rule once in `_common/`, then re-run `install.sh`.
 ## Notes and guarantees
 
 - The supervisor never edits feature code, never merges or pushes itself, never deletes branches, and never
-  force-pushes. Only the integrator pushes to the target repo. Only `rpp-feedback` pushes to this repo.
+  force-pushes. Only the integrator and `rpp-ci-fixer` push to the target repo. Only `rpp-feedback` pushes to this repo.
 - Agents write documents, reports, comments, and commit messages in
   [ASD-STE100](https://www.asd-ste100.org/) (Simplified Technical English). The integrator's summary is exempt.
 - State, plan, verify files, and reports are in `<repo>/.git/rpp/<run>/`. Worktrees are in `../.rpp-wt-<slug>/`
