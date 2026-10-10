@@ -2,7 +2,7 @@
 
 RPP turns a one-line feature request into a reviewed pull request. You give it a repo and a feature prompt.
 A supervisor agent then runs a fixed pipeline of specialist agents: plan, implement, verify, two parallel
-reviews, merge, tidy, and PR, then a feedback stage that improves the pipeline itself. You are only asked a
+reviews, merge, tidy, and PR, then a CI-fix loop, an automatic merge, and a feedback stage that improves the pipeline itself. You are only asked a
 question when an agent is stuck.
 
 This repo contains the pieces for OMP and an installer:
@@ -125,7 +125,7 @@ file and continues from the recorded stage.
 ## How the pipeline runs
 
 ```
- preflight ─► 1 Plan ─► 2 Implement ─► 3 Verify ─┬─ PASS ─► 4 Review x2 (parallel) ─► 5 Merge ─► 6 Tidy ─► 7 Finish (PR) ─► 8 CI loop ─► 9 Feedback
+ preflight ─► 1 Plan ─► 2 Implement ─► 3 Verify ─┬─ PASS ─► 4 Review x2 (parallel) ─► 5 Merge ─► 6 Tidy ─► 7 Finish (PR) ─► 8 CI loop ─► 9 Land (merge) ─► 10 Feedback
                               ▲                  │
                               └──── FAIL ◄───────┘ (one automatic retry, then ask you)
 ```
@@ -136,7 +136,7 @@ That directory holds `state.md`, `PLAN.md`, the `VERIFY-<n>.md` files, and all a
 `.git`, so none of it is ever committed and the PR contains only feature changes.
 
 `state.md` records the current stage, the status of each agent in it, and a timestamped log of stage times,
-verify rounds, blockers, and your answers. `resume` uses it to skip agents that already finished, and stage 9
+verify rounds, blockers, and your answers. `resume` uses it to skip agents that already finished, and stage 10
 uses the log to find waste.
 
 **1. Plan: `rpp-planner`** (Sonnet). Explores the repo and writes `PLAN.md`: goal, repo context, ordered
@@ -188,7 +188,16 @@ decides the cause: a code defect, a CI setup error, or a flaky run. It fixes the
 pushes to the feature branch, and the supervisor waits again. It never skips, disables, or weakens a check. After
 10 fixer attempts, or when the fixer is blocked, the supervisor asks you.
 
-**9. Feedback: `rpp-feedback`** (Opus, High effort). Runs after the PR is open, and after an aborted run that
+**9. Land: `rpp-integrator`** (Sonnet, `land` mode). Merges the PR by itself, unless the prompt contains
+`no-merge`. It merges only if all of these hold: CI is green on the PR's head commit, the PR has no conflicts, no
+review requests changes, and the run is low-risk. A run is **not** low-risk if `rpp-security-high` ran, a security
+finding was high or critical, the tidy merge was dropped, or verify needed more than one round. In those cases the
+PR stays open for a human. It uses the repo's allowed merge method (squash first), and never uses `--admin`,
+`--auto`, or `--delete-branch`. If the repo needs a review, it reports "waiting on review" and stops. If main moved
+and the PR conflicts, it merges main into the feature branch, pushes, and the pipeline returns to stage 8
+(at most 2 times, then it asks you). After a merge it fast-forwards your local main branch.
+
+**10. Feedback: `rpp-feedback`** (Opus, High effort). Runs after the PR is open, and after an aborted run that
 got past planning. It reads `state.md`, the plan, the verify files, and every report, and looks for waste,
 escaped defects, and avoidable questions. It then:
 
@@ -250,7 +259,7 @@ Change a shared rule once in `_common/`, then re-run `install.sh`.
 ## Notes and guarantees
 
 - The supervisor never edits feature code, never merges or pushes itself, never deletes branches, and never
-  force-pushes. Only the integrator and `rpp-ci-fixer` push to the target repo. Only `rpp-feedback` pushes to this repo.
+  force-pushes. Only the integrator and `rpp-ci-fixer` push to the target repo, and only the integrator merges a PR (stage 9). Only `rpp-feedback` pushes to this repo.
 - Agents write documents, reports, comments, and commit messages in
   [ASD-STE100](https://www.asd-ste100.org/) (Simplified Technical English). The integrator's summary is exempt.
 - State, plan, verify files, and reports are in `<repo>/.git/rpp/<run>/`. Worktrees are in `../.rpp-wt-<slug>/`

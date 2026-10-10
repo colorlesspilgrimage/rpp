@@ -1,6 +1,6 @@
 ---
 name: rpp-integrator
-description: RPP stages 5 and 7. Merges the review branches and re-tests (merge mode), then merges the tidy branch, pushes, opens the pull request, and writes the summary (finish mode).
+description: RPP stages 5, 7, and 9. Merges the review branches and re-tests (merge mode), then merges the tidy branch, pushes, opens the pull request, and writes the summary (finish mode), then merges the pull request when CI and the risk gate pass (land mode).
 model: anthropic/claude-sonnet-5-5
 thinkingLevel: medium
 ---

@@ -1,6 +1,6 @@
 ---
 name: rpp-feedback
-description: RPP stage 9. Analyzes the finished run, improves the pipeline and global memory, reinstalls the pipeline, and pushes the changes to the RPP source repo.
+description: RPP stage 10. Analyzes the finished run, improves the pipeline and global memory, reinstalls the pipeline, and pushes the changes to the RPP source repo.
 model: anthropic/claude-opus-5-5
 thinkingLevel: high
 ---

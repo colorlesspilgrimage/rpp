@@ -18,7 +18,7 @@ mean: continue the run in the state file instead of starting a new one.
    Exception: relay the integrator's final summary as it is.
 3. Never edit feature code yourself. Do only: git branch/commit/status, `git worktree add`, `mkdir`, `mv` inside
    RUN_DIR, `ln -s` and `.git/info/exclude` lines for dependency links, `gh auth status`, reading reports,
-   `gh pr checks`, and state-file updates.
+   `gh pr checks`, `gh pr view`, and state-file updates.
 4. Subagents cannot ask the user. Only you can. Ask ONLY when a subagent reports `STATUS: BLOCKED`
    after its two attempts (see "Blockers"), when preflight fails, or at the High-effort gate.
    Send no progress messages.
@@ -26,7 +26,7 @@ mean: continue the run in the state file instead of starting a new one.
 6. Use the tools `telegram_ask` (questions) and `telegram_send` (final summary) when they exist.
    Otherwise use `ask` and normal replies.
 7. Never start an agent that runs at High effort without the user's approval (see "High-effort gate").
-   Exception: `rpp-feedback` in Stage 9. The user approved it for every run when they added the stage.
+   Exception: `rpp-feedback` in Stage 10. The user approved it for every run when they added the stage.
 
 ## Preflight
 1. `git -C <repo> status --porcelain` must be empty. `gh auth status` must pass.
@@ -47,7 +47,7 @@ mean: continue the run in the state file instead of starting a new one.
 - `## Agents`: one line per agent run in the current stage: `<name>: running | done | blocked`.
   Write `running` before you start an agent and the result after it finishes.
 - `## Log`: one line per event, with a UTC time from `date -u +%FT%TZ`: each stage start and end, each verify
-  verdict and round, each STATUS: BLOCKED (agent and problem in one line), and each user answer. Stage 9 reads it.
+  verdict and round, each STATUS: BLOCKED (agent and problem in one line), and each user answer. Stage 10 reads it.
 Update the header and `## Agents` after every stage and agent. Change those lines in place
 (for example `sed -i 's/^stage: .*/stage: 4 (review)/' state.md`). At a new stage, replace the `## Agents` lines.
 `## Log` is the last part of the file: append only log lines with `>>`.
@@ -124,7 +124,7 @@ When it ends with `STATUS: DONE`: read `summary.md`, send it to the user (`teleg
 with the PR link. Then go to Stage 8.
 
 ## Integrator escalation
-If an integrator pass reports `STATUS: BLOCKED` (or produces no report), start `rpp-integrator-escalation`
+If an integrator pass (Stage 5, 7, or 9) reports `STATUS: BLOCKED` (or produces no report), start `rpp-integrator-escalation`
 ONCE for that stage, name `integrator-escalation`, with the same task text plus
 `PREVIOUS REPORT: <that report>`. It writes to the same REPORT PATH. This agent runs at medium effort, so it
 needs no gate. If it is also BLOCKED, treat it as a blocker for the user (start `rpp-integrator-escalation`
@@ -133,7 +133,7 @@ again with the user's direction).
 ## Stage 8: CI
 Set CI_ATTEMPT = 0. PR = the PR number from `gh pr view <FEATURE> --json number`. Log `ci start`.
 1. Wait for checks to appear: run `gh pr checks <PR> --json name` every 30 seconds, up to 3 minutes.
-   If none appear, log `ci: no checks` and go to Stage 9 (Feedback).
+   If none appear, log `ci: no checks` and go to Stage 9 (Land).
 2. Wait for the result: `timeout 1800 gh pr checks <PR> --watch --interval 30`.
    - Exit code 0 (all pass): log `ci: PASS` and go to Stage 9.
    - Exit code 1 (a check failed): go to step 3.
@@ -147,8 +147,23 @@ Set CI_ATTEMPT = 0. PR = the PR number from `gh pr view <FEATURE> --json number`
    - `STATUS: DONE`: go back to step 2.
    - `STATUS: BLOCKED`: blocker for the user (see "Blockers").
 
-## Stage 9: Feedback
-Run this stage after Stage 8 is done, and also after the user aborts a run that finished Stage 1.
+## Stage 9: Land
+Merging is automatic. If the feature prompt contains the word `no-merge`, log `land: skipped (no-merge)`,
+tell the user the PR is ready for review, and go to Stage 10. Otherwise set LAND_ROUND = 0.
+1. `task` agent `rpp-integrator`, name `integrator-land`. Task text: `MODE: land`, REPO, FEATURE, MAIN_BRANCH,
+   PLAN, PR, REPORTS, `VERIFY ROUNDS: <number of verify FAIL lines in the state log, plus 1>`,
+   `SECURITY_HIGH_RAN: yes|no`, and `REPORT PATH: <REPORTS>/integrator-land.md`.
+   Check STATUS. On `STATUS: BLOCKED`, see "Integrator escalation".
+2. Read the line `RESULT:` in the report. Log it.
+   - `RESULT: merged <sha>`: send the user one short message (PR merged). Go to Stage 10.
+   - `RESULT: not merged: <reason>` (risk gate, waiting on review, or checks not green): send the user
+     one short message with the reason. The PR stays open. Go to Stage 10.
+   - `RESULT: updated`: the integrator merged the main branch into FEATURE and pushed. LAND_ROUND += 1.
+     If LAND_ROUND is 3, this is a blocker: ask the user (see "Blockers"). Otherwise go back to Stage 8, then
+     repeat Stage 9. Reset CI_ATTEMPT to 0 first.
+
+## Stage 10: Feedback
+Run this stage after Stage 9 is done, and also after the user aborts a run that finished Stage 1.
 `task` agent `rpp-feedback`, name `feedback`. Task text: REPO, RUN_DIR, REPORTS, FEATURE, MAIN_BRANCH,
 the outcome (`done` or `aborted`), the PR URL if there is one, and `REPORT PATH: <REPORTS>/feedback.md`.
 Do not use the common task context.
@@ -170,7 +185,7 @@ Check with `/agents` if you are not sure.
 3. Wait for the answer. Do not use a timeout. Do not start the agent without a clear yes.
 4. A yes covers that one spawn only. Ask again before any later High-effort spawn.
 5. If the user skips it, treat the original `STATUS: BLOCKED` report as a blocker for the user
-   (see "Blockers"). If the user aborts, run Stage 9, then stop the run.
+   (see "Blockers"). If the user aborts, run Stage 10, then stop the run.
 
 ## Blockers
 A blocker is a `STATUS: BLOCKED` report that survived the agent's two attempts (and, for security,
@@ -181,7 +196,7 @@ the approved High pass, or the user declining it; for the integrator, the escala
    If two agents are blocked at the same time, ask about both in one `ask`.
 3. Start the same agent type again (new `task`, same BRANCH and WORKTREE for worktree agents) with:
    `USER DIRECTION: <answer>` and `PREVIOUS REPORT: <report path>`.
-4. If the user answers `abort`, run Stage 9 if Stage 1 finished, then stop the run.
+4. If the user answers `abort`, run Stage 10 if Stage 1 finished, then stop the run.
    Say what state the repo and branches are in.
 5. Repeat until every agent is DONE.
 
@@ -190,5 +205,5 @@ the approved High pass, or the user declining it; for the integrator, the escala
   problem statement.
 - A task text was wrong after the agent started: send the correction with `write agent://<name>` to that agent only.
   Never write to `agent://all`. It wakes agents that are done.
-- Never merge or push yourself. Never delete branches. Never force-push.
+- Never merge or push yourself. Only `rpp-integrator` merges a PR, and only in Stage 9. Never delete branches. Never force-push.
   Only the integrator and `rpp-ci-fixer` push the feature branch.

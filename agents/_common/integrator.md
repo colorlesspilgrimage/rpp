@@ -1,4 +1,4 @@
-Your task gives: MODE (`merge` or `finish`), REPO, FEATURE, MAIN_BRANCH, PLAN (absolute path), the review
+Your task gives: MODE (`merge`, `finish`, or `land`), REPO, FEATURE, MAIN_BRANCH, PLAN (absolute path), the review
 branches with their worktrees, and REPORTS. You are NOT required to write in ASD-STE100.
 Work in the main checkout, on FEATURE. Run the FULL TEST command and the manual check script from PLAN
 whenever this file says "test".
@@ -27,9 +27,34 @@ whenever this file says "test".
 6. Write a concise summary for the user to `<REPORTS>/summary.md`: what changed, risks and open items,
    and the PR URL.
 
+## MODE: land (after the CI stage)
+Your task also gives PR, VERIFY ROUNDS, and SECURITY_HIGH_RAN. The last line before STATUS in your report
+is `RESULT: ...` (see below). Never use `--admin`. Never use `--delete-branch`. Never use `--auto`.
+1. Risk gate. Do not merge if any of these is true:
+   - SECURITY_HIGH_RAN is `yes`.
+   - A security report in REPORTS lists a finding with severity high or critical.
+   - The finish report says the tidy merge was reverted or dropped.
+   - VERIFY ROUNDS is more than 1.
+   Then write `RESULT: not merged: risk gate (<which>)` and `STATUS: DONE`. The PR stays open for a human.
+2. Read the PR: `gh pr view <PR> --json headRefOid,mergeable,mergeStateStatus,reviewDecision,statusCheckRollup`.
+   - `headRefOid` must equal `git rev-parse FEATURE`. If not, push or fetch first so both agree.
+   - Every check must be `SUCCESS`, `NEUTRAL`, or `SKIPPED`. If not: `RESULT: not merged: checks not green`.
+   - `reviewDecision` of `CHANGES_REQUESTED`: `RESULT: not merged: changes requested`.
+3. If `mergeable` is `CONFLICTING`, or the PR is behind the main branch and the repo needs it current:
+   check out FEATURE, merge `origin/<MAIN_BRANCH>` into it, solve conflicts (keep both sides' intent), test,
+   and push. Write `RESULT: updated`. CI runs again. Stop here.
+4. Pick the merge method from `gh repo view --json squashMergeAllowed,mergeCommitAllowed,rebaseMergeAllowed`.
+   Prefer squash, then merge commit, then rebase. Run `gh pr merge <PR> --<method>`.
+   If the merge is refused because a review or a check is required: `RESULT: not merged: waiting on review`.
+   Do not look for a way around the rule.
+5. Check out MAIN_BRANCH and run `git pull --ff-only`. Get the merge commit: `gh pr view <PR> --json mergeCommit`.
+   Write `RESULT: merged <sha>`.
+6. Report: the gate checks and their results, the merge method, and the result.
+
 ## Report and blockers
 You cannot ask the user. If a merge or test problem needs a human decision, try two different approaches
 first. Then stop and write the blocker in your report: what is blocked, what you tried, 2 or 3 options,
 and your recommendation.
 The LAST line of your report must be exactly `STATUS: DONE` or `STATUS: BLOCKED`.
 Your final message is a short summary (in `finish` mode, the same text as summary.md), ending with the STATUS line.
+In `land` mode, the line before STATUS is the `RESULT:` line.

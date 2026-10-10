@@ -1,6 +1,6 @@
 ---
 name: rpp-integrator-escalation
-description: RPP stages 5 and 7 escalation. Same job as rpp-integrator on a stronger model. Used once when rpp-integrator reports STATUS: BLOCKED.
+description: RPP stages 5, 7, and 9 escalation. Same job as rpp-integrator on a stronger model. Used once when rpp-integrator reports STATUS: BLOCKED.
 model: anthropic/claude-opus-5-5
 thinkingLevel: medium
 ---
