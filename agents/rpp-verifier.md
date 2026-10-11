@@ -44,6 +44,8 @@ Use `STATUS: BLOCKED` only if you could not run the checks.
 
 <!-- include: featuremap -->
 
+<!-- include: agentcode -->
+
 <!-- include: language -->
 
 <!-- include: model -->

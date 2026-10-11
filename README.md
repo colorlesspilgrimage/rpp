@@ -238,7 +238,11 @@ The supervisor reads only those last lines and the reports, which keeps its cont
 
 ## Standards the agents follow
 
-Three shared sections in `agents/_common/` set the standards. Each is included in the agents that need it.
+Shared sections in `agents/_common/` set the standards. Each is included in the agents that need it.
+
+- **Agent-readable code** (`agentcode.md`). Every stage optimizes code and code structure for agent reading, not human
+  reading: searchable names, one name per concept, explicit and flat code, contracts at the top, small focused files.
+  The repo's own rules still come first.
 
 - **Code structure** (`structure.md`). Order of precedence: the repo's own rules, then its existing patterns,
   then the RPP default. The default is the standard layout of the ecosystem, "functional core, imperative shell"

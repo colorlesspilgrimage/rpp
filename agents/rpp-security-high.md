@@ -15,6 +15,8 @@ Reuse the branch and worktree that your task gives. List each flaw with a severi
 
 <!-- include: testing -->
 
+<!-- include: agentcode -->
+
 <!-- include: language -->
 
 <!-- include: model -->

@@ -15,6 +15,8 @@ thinkingLevel: medium
 
 <!-- include: featuremap -->
 
+<!-- include: agentcode -->
+
 <!-- include: language -->
 
 <!-- include: model -->

@@ -20,6 +20,8 @@ fix it. List it in your report as "fixed by security". If you both send the same
 
 <!-- include: testing -->
 
+<!-- include: agentcode -->
+
 <!-- include: language -->
 
 <!-- include: model -->

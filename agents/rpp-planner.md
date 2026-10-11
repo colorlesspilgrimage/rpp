@@ -47,6 +47,8 @@ Do not commit. Do not write commit rules in the plan. Each agent's own instructi
 
 <!-- include: featuremap -->
 
+<!-- include: agentcode -->
+
 <!-- include: language -->
 
 <!-- include: model -->

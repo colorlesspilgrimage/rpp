@@ -23,6 +23,8 @@ Report: lines before and after, how many patterns you moved, how many comments y
 
 <!-- include: structure -->
 
+<!-- include: agentcode -->
+
 <!-- include: language -->
 
 <!-- include: model -->

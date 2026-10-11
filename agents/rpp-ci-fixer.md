@@ -29,6 +29,8 @@ push result or rerun result, and the test results.
 
 <!-- include: tests -->
 
+<!-- include: agentcode -->
+
 <!-- include: language -->
 
 <!-- include: model -->

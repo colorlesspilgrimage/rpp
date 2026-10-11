@@ -22,6 +22,8 @@ and use STATUS: BLOCKED. The supervisor then starts a High-effort pass.
 
 <!-- include: testing -->
 
+<!-- include: agentcode -->
+
 <!-- include: language -->
 
 <!-- include: model -->
