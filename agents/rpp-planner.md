@@ -19,6 +19,8 @@ The plan must contain these sections, in this order:
    - `FAST TEST:` a command that runs only the tests for the files this feature changes. Check that it works.
    - `FULL TEST:` the command that runs the full test suite.
    - `LINT:` the command that runs the formatter, linter, and type checker. Write `none` if the repo has none.
+     Check that it runs on this machine. If a tool is missing and you cannot install it without root, give a
+     command that gets it for the user (for example `uvx --from shellcheck-py shellcheck`). All agents use this command.
    - `COVERAGE:` a command that reports coverage of the changed lines. Write `none` if the repo has no coverage tool.
    - `SHARED DEPENDENCY DIRECTORIES:` directories that hold only third-party dependencies (for example
      `node_modules`). A directory is shared by symlink into other worktrees, so list it only if it has no
@@ -36,7 +38,9 @@ The plan must contain these sections, in this order:
 7. Feature map entry: the exact text to add to `docs/FEATURES.md` (see "Feature map").
 8. Manual check script: exact commands, inputs, and expected outputs to run the program as a user.
    Use valid input and realistic data.
-9. Risks and open assumptions.
+9. Risks and open assumptions. Check each external fact that the plan uses (a package name in each target
+   distro release, an image tag, an action version, a tool on this machine) with a command or its official source.
+   Do not copy it from repo docs. Mark each fact that you could not check, and do not put it in an acceptance criterion as true.
 
 If the prompt is too unclear to plan, do not guess. Report STATUS: BLOCKED with specific questions as options.
 Do not commit. Do not write commit rules in the plan. Each agent's own instructions tell it when to commit.
