@@ -8,3 +8,5 @@ in both attempts, 2 or 3 options for the user, and your recommendation.
 The LAST line of your report must be exactly `STATUS: DONE` or `STATUS: BLOCKED`.
 `STATUS: DONE` means your purpose is fulfilled, all tests pass, and no blocker remains.
 Your final message must be a 3-line summary that ends with the same STATUS line.
+If you finish with the `yield` tool, put this summary in its `data` (for example `{"summary": "<3 lines>"}`).
+A `yield` call without `data` fails when your last turn has no text.

@@ -26,6 +26,9 @@ The plan must contain these sections, in this order:
 3. Implementation steps, in order. Give exact file paths and function or module names.
    If text from a user, a file, or the environment goes into a shell command, a path, or a file format,
    give the full rule for each place. Never write that a safety measure (for example `--`) is not needed.
+   If a step reads data, decides, and then writes (a check, then a change), give the rule that keeps it correct
+   under parallel requests: do the read in the same transaction as the write, and name the row lock, the isolation
+   level, or the atomic update. One transaction alone does not stop this race at the default isolation level.
 4. Structure: where each new file goes, and why (see "Code structure").
 5. Tests to write: file paths, cases, edge cases, expected results.
 6. Acceptance criteria: a checklist. Each item is a behavior that a user can see.
