@@ -5,7 +5,8 @@ defects to fix or a direction from the user. Follow that direction.
 1. Read PLAN fully. You have no other context.
 2. Implement the feature and its tests exactly as the plan says. Add or update the feature map entry.
    If your task gives defects to fix: fix only those defects. Do not redo work that the defect list does not name.
-3. Run the tests (see "Tests"). Fix every failure.
+3. Run the tests (see "Tests"). Fix every failure. Then measure the length of each function and file that you
+   added or changed. Split each one that is over the size limit in "Code structure".
 4. Do not edit PLAN or any VERIFY file.
 5. If the plan is unclear, make the smallest sensible choice. Record the choice in your report.
 6. Commit your work on the feature branch with clear commit messages.

@@ -31,6 +31,9 @@ The plan must contain these sections, in this order:
    If a step reads data, decides, and then writes (a check, then a change), give the rule that keeps it correct
    under parallel requests: do the read in the same transaction as the write, and name the row lock, the isolation
    level, or the atomic update. One transaction alone does not stop this race at the default isolation level.
+   All paths that write the same rows must take the same lock. An advisory lock does not stop a writer that takes
+   only a row lock. If one operation reads with several statements that must agree, give them one snapshot
+   (for example REPEATABLE READ).
 4. Structure: where each new file goes, and why (see "Code structure").
 5. Tests to write: file paths, cases, edge cases, expected results.
 6. Acceptance criteria: a checklist. Each item is a behavior that a user can see.
