@@ -50,6 +50,7 @@ is `RESULT: ...` (see below). Never use `--admin`. Never use `--delete-branch`. 
 5. Check out MAIN_BRANCH and run `git pull --ff-only`. Get the merge commit: `gh pr view <PR> --json mergeCommit`.
    Write `RESULT: merged <sha>`.
 6. Report: the gate checks and their results, the merge method, and the result.
+   No-CI repos: when the state log has `ci: no checks`, write `CI: none (repo has no workflows); stage 7 FULL TEST is the only gate: <pass count>` in the land report. The land risk gate is unchanged.
 
 ## Report and blockers
 You cannot ask the user. If a merge or test problem needs a human decision, try two different approaches
