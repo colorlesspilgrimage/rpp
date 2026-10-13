@@ -18,8 +18,8 @@ mean: continue the run in the state file instead of starting a new one.
 2. Write every message to the user in ASD-STE100 (short sentences, active voice, no idioms).
    Exception: relay the integrator's final summary as it is.
 3. Never edit feature code yourself. Do only: git branch/commit/status, `git worktree add`, `mkdir`, `mv` inside
-   RUN_DIR, `ln -s` and `.git/info/exclude` lines for dependency links, `gh auth status`, reading reports,
-   `gh pr checks`, `gh pr view`, and state-file updates.
+   RUN_DIR, `cp` of `<repo>/.git/rpp/queue/PLAN-<slice>.md` to `<PLAN>`, `ln -s` and `.git/info/exclude` lines
+   for dependency links, `gh auth status`, reading reports, `gh pr checks`, `gh pr view`, and state-file updates.
 4. Subagents cannot ask the user. Only you can. Ask ONLY when a subagent reports `STATUS: BLOCKED`
    after its two attempts (see "Blockers"), when preflight fails, for the implementer choice in preflight,
    or at the High-effort gate. Send no progress messages.
@@ -82,8 +82,15 @@ Put this exact WORKTREE path in the agent's task text. Never write a placeholder
    (add it if missing), so no agent commits the link.
 
 ## Stage 1: Plan
-`task` agent `rpp-planner`, name `planner`. Task text: the feature prompt, `PLAN PATH: <PLAN>`, and
+A slice queue is an ordered list of feature prompts. `<slice>` in `PLAN-<slice>.md` is the SLUG of that prompt.
+When the user gives a slice queue and `<repo>/.git/rpp/queue/PLAN-<SLUG>.md` already exists, copy that file
+to `<PLAN>` and skip this stage. Go to Stage 2. A skipped Stage 1 has no planner report.
+Otherwise `task` agent `rpp-planner`, name `planner`. Task text: the feature prompt, `PLAN PATH: <PLAN>`, and
 `REPORT PATH: <REPORTS>/planner.md`.
+When the user gives a slice queue, batch-plan the remaining slices in this same task (one exploration).
+A remaining slice is a queue prompt that has no `PLAN-<slice>.md` yet.
+`mkdir -p <repo>/.git/rpp/queue`. Add `QUEUE DIR: <repo>/.git/rpp/queue` and each remaining slice prompt.
+After the planner finishes, copy `<repo>/.git/rpp/queue/PLAN-<SLUG>.md` to `<PLAN>` when that file exists.
 Check: PLAN exists and is not empty, and the report ends with `STATUS: DONE`. Do not commit PLAN.
 
 ## Stages 2 and 3: Implement, then Verify (loop)
@@ -94,6 +101,9 @@ Set ROUND = 0, N = 0, and FIX = "".
 2. N += 1. `task` agent `rpp-verifier`, name `verifier`. Task text: `VERIFY PATH: <RUN_DIR>/VERIFY-<N>.md`,
    `REPORT PATH: <REPORTS>/verifier-<N>.md`, and `IMPLEMENTER REPORT: <REPORTS>/implementer.md`.
    If N is 1: `MODE: full`. Else: `MODE: recheck` and `PREVIOUS VERIFY: <RUN_DIR>/VERIFY-<N-1>.md`.
+   If Stage 1 was skipped, add: `Check that PLAN still matches MAIN_BRANCH. A repo fact in PLAN that is now
+   false on MAIN_BRANCH is a defect. An ASSUMPTION (unmerged <slice>) is a defect only when that slice is
+   now on MAIN_BRANCH and the assumption is false.`
 3. Read the LAST line of `<RUN_DIR>/VERIFY-<N>.md`.
    - `VERDICT: PASS`: go to Stage 4.
    - `VERDICT: FAIL`: ROUND += 1. If ROUND is 1: set FIX = "Fix every defect listed in <RUN_DIR>/VERIFY-<N>.md.
@@ -120,14 +130,15 @@ reports end with `STATUS: DONE`.
 PLAN, the auditor and security branches and worktrees, REPORTS, and `REPORT PATH: <REPORTS>/integrator-merge.md`.
 Check STATUS. On `STATUS: BLOCKED`, see "Integrator escalation".
 
-## Stage 6: Tidy
+## Stages 6 and 7: Tidy and finish (one task)
+Dispatch Stages 6 and 7 as one tidy+finish task in one agent. Do not start `rpp-tidy`.
+Set the stage to `6-7 (tidy+finish)`.
 Do "Worktree setup" for `tidy` (it branches from FEATURE, which now has the merged fixes).
-`task` agent `rpp-tidy`, name `tidy`. Task text: FEATURE_BRANCH, BRANCH, WORKTREE, REPO, MAIN_BRANCH,
-`REPORT PATH: <REPORTS>/tidy.md`. On `STATUS: BLOCKED`: blocker for the user (see "Blockers").
-
-## Stage 7: Finish
-`task` agent `rpp-integrator`, name `integrator-finish`. Task text: `MODE: finish`, REPO, FEATURE, MAIN_BRANCH,
-PLAN, the tidy branch and worktree, REPORTS, and `REPORT PATH: <REPORTS>/integrator.md`.
+`task` agent `rpp-integrator`, name `integrator-tidy-finish`. Task text: `MODE: finish`,
+REPO, FEATURE, MAIN_BRANCH, PLAN, the tidy branch `<FEATURE>-tidy` and its worktree, REPORTS,
+and `REPORT PATH: <REPORTS>/integrator.md`.
+This agent tidies on `<FEATURE>-tidy`, merges that branch into FEATURE, runs the full suite, and opens the PR.
+When its finish rules say to skip tidy, it goes straight to finish and reports `tidy: skipped (<reason>)`.
 On `STATUS: BLOCKED`, see "Integrator escalation".
 When it ends with `STATUS: DONE`: read `summary.md`, send it to the user (`telegram_send` when available)
 with the PR link. Then go to Stage 8.

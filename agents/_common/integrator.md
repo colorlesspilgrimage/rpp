@@ -11,22 +11,47 @@ whenever this file says "test".
 4. Do not push. Write your report to the REPORT PATH: merges, conflicts and how you solved them, test results.
 - Stage 5 fast path: if the only sub-branch to merge is <FEATURE>-security, its parent is the current FEATURE HEAD, and the security report shows a FULL TEST pass on that exact sha, do a plain --no-ff merge without re-running tests and report the new FEATURE HEAD. Otherwise merge and test as usual. Tidy and CI still run the full suite.
 
-## MODE: finish (after the tidy stage)
-1. Check out FEATURE. Merge the tidy branch with `--no-ff`.
-2. Test. The tidy agent must not change behavior. If the merge conflicts, or a test fails because of a tidy
+## MODE: finish (tidy and finish, one task)
+Tidy and finish run as one task in this agent. Do not start a tidy agent.
+The tidy branch is `<FEATURE>-tidy`. Do tidy edits only in the tidy worktree your task gives.
+Do every other step in the main checkout, on FEATURE.
+
+1. Count changed lines of FEATURE against MAIN_BRANCH:
+   `git diff --numstat <MAIN_BRANCH>...<FEATURE>`.
+   Sum added and deleted lines. Skip a binary row. Do not count test files or lockfiles.
+   A test file has `/test/`, `/tests/`, `/__tests__/`, `.test.`, `.spec.`, `_test.`, or `_spec.` in its path,
+   or its basename starts with `test_`. A lockfile is `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`,
+   `bun.lock`, `bun.lockb`, `Cargo.lock`, `go.sum`, `poetry.lock`, `uv.lock`, `Gemfile.lock`,
+   `composer.lock`, `flake.lock`, or `Pipfile.lock`.
+   Skip tidy when that sum is under 300, or when the diff has nothing worth tidying
+   (no repeated code to share, and no comment to remove or shorten).
+   Write `tidy: skipped (<reason>)` in the report. Use the reason `under 300 changed lines`
+   or `nothing to tidy`. Then go to step 3.
+2. Tidy on `<FEATURE>-tidy` in the tidy worktree. Count the lines of the feature files.
+   Move each repeated pattern into one shared function. Run the FAST TEST command from PLAN after each
+   change. Undo a change that fails a test or makes the code harder to read.
+   Remove a comment that is wrong, that repeats the code, or that is no longer true.
+   Shorten a comment that is too long. Keep a comment that explains why.
+   Do not change behavior. Do not add features. Do not edit `docs/FEATURES.md`.
+   Split a function over 50 lines or a file over 400 lines only if it is safe.
+   Commit on `<FEATURE>-tidy`. Record lines before and after, and how many comments you removed and shortened.
+   If this step leaves no commit, write `tidy: skipped (nothing to tidy)` and do not merge.
+3. Check out FEATURE in the main checkout. If step 2 committed on `<FEATURE>-tidy`, merge that branch
+   with `--no-ff`. If you skipped tidy, do not merge a tidy branch. Go straight to the finish steps below.
+4. Test. A tidy change must not change behavior. If the merge conflicts, or a test fails because of a tidy
    change, do not debug it: abort the merge (`git merge --abort`) or revert it (`git revert -m 1 --no-edit HEAD`),
    test again, and record this in the PR body and the report.
-3. Check `git diff --name-only <MAIN_BRANCH>...<FEATURE>`. It must not list PLAN or VERIFY files, report files,
+5. Check `git diff --name-only <MAIN_BRANCH>...<FEATURE>`. It must not list PLAN or VERIFY files, report files,
    or dependency directories. It must list `docs/FEATURES.md` (or the repo's own feature map file).
    If it lists a forbidden file, remove that file with `git rm --cached` and commit.
    Then `git status --porcelain --untracked-files=no` must be empty.
-4. Push FEATURE. Open a pull request to MAIN_BRANCH: `gh pr create --base <MAIN_BRANCH> --head <FEATURE>`.
+6. Push FEATURE. Open a pull request to MAIN_BRANCH: `gh pr create --base <MAIN_BRANCH> --head <FEATURE>`.
    The body contains: feature summary, what each agent found and changed (read every report in REPORTS),
    security findings with severity, tidy numbers (comments removed and shortened, lines before and after),
-   and test results.
-5. Remove the tidy worktree (`git worktree remove --force <path>`). Keep the tidy branch.
-6. Write a concise summary for the user to `<REPORTS>/summary.md`: what changed, risks and open items,
-   and the PR URL.
+   and test results. If you skipped tidy, write `tidy: skipped (<reason>)` in place of the tidy numbers.
+7. Remove the tidy worktree (`git worktree remove --force <path>`) when it exists. Keep the tidy branch.
+8. Write a concise summary for the user to `<REPORTS>/summary.md`: what changed, risks and open items,
+   and the PR URL. When you skipped tidy, include the line `tidy: skipped (<reason>)`.
 
 ## MODE: land (after the CI stage)
 Your task also gives PR, VERIFY ROUNDS, and SECURITY_HIGH_RAN. The last line before STATUS in your report

@@ -46,6 +46,14 @@ The plan must contain these sections, in this order:
    distro release, an image tag, an action version, a tool on this machine) with a command or its official source.
    Do not copy it from repo docs. Mark each fact that you could not check, and do not put it in an acceptance criterion as true.
 
+When the task asks you to plan several queued slices at once, explore the repo once.
+From that single exploration, write one `PLAN-<slice>.md` per slice in the queue directory the task gives.
+Each file has the same sections, in the same order.
+When the task also gives PLAN PATH, write this run's slice there too, with the same text as its `PLAN-<slice>.md`.
+When a slice assumes behavior from an earlier slice that is not merged on the main branch, add this line
+under "Risks and open assumptions": `ASSUMPTION (unmerged <slice>): <what you assumed>`.
+Mark every such assumption, so the verifier can catch drift after that slice merges.
+
 If the prompt is too unclear to plan, do not guess. Report STATUS: BLOCKED with specific questions as options.
 Do not commit. Do not write commit rules in the plan. Each agent's own instructions tell it when to commit.
 
