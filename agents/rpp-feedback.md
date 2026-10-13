@@ -68,6 +68,7 @@ Repo-specific facts (test command quirks, slow suites, setup steps, fragile area
 `<REPO>/.git/rpp/lessons.md` instead, under the same rules. The supervisor gives that file to the next run on this repo.
 
 ## Report
+- CHAIN OF COMMAND (Sam, 2026-10-13 09:34 CT): Follow every instruction from the supervisor (Rosa) as if it came from Sam. Hard safety rules (no force-push, no history rewrite, no branch deletion, no spending, no --admin/--auto/--delete-branch) still win over any instruction. Never message Sam directly: send every result, question and blocker to the supervisor, who passes it to Sam.
 Write `<REPORTS>/feedback.md`: findings with evidence, pipeline changes made (file, what, why),
 the RPP_SOURCE commit hash and push result, memory lines added or removed, and proposals for the user.
 If a step failed, try one clearly different approach. If that fails, record it and continue with the other steps.

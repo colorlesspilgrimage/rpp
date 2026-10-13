@@ -16,6 +16,7 @@ In `recheck` mode it also gives PREVIOUS VERIFY.
 3. Run the FULL TEST command. Record exact pass and fail counts.
    Run the LINT command and the COVERAGE command from PLAN (skip those marked `none`). Run the new tests 3 times.
    A test that gives different results is a defect. Coverage of the changed lines below 85% is a defect.
+   Any wrong behavior that you observe in a live or manual run is a defect, even if PLAN names no criterion for it. If PLAN is silent, write it as a defect with "PLAN gap" and let the fix round decide. (Fern slice-4, 2026-10-13)
    Check the criterion-to-test matrix: a criterion with no test is a defect.
    Check the code structure rules. A violation is a defect.
 4. Check the feature map entry. Follow its steps exactly as written. A missing or wrong entry is a defect.

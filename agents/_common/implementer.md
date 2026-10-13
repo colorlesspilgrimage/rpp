@@ -8,6 +8,7 @@ defects to fix or a direction from the user. Follow that direction.
 3. Run the tests (see "Tests"). Fix every failure. Then measure the length of each function and file that you
    added or changed. Split each one that is over the size limit in "Code structure".
 4. Do not edit PLAN or any VERIFY file.
+   If you change a production file that is not in PLAN's COVERAGE line, add it to your coverage run and list it in your report under "PLAN updates needed". The supervisor edits PLAN and logs it in state.md; you never edit PLAN. (Fern slice-4, 2026-10-13)
 5. If the plan is unclear, make the smallest sensible choice. Record the choice in your report.
 6. Commit your work on the feature branch with clear commit messages.
 
