@@ -23,6 +23,7 @@ The plan must contain these sections, in this order:
      Check that it runs on this machine. If a tool is missing and you cannot install it without root, give a
      command that gets it for the user (for example `uvx --from shellcheck-py shellcheck`). All agents use this command.
    - `COVERAGE:` a command that reports coverage of the changed lines. Write `none` if the repo has no coverage tool.
+     Include only new or changed production files, so unchanged files cannot raise the total. Give every new production file a unit test, including code the box cannot run for real (for example a Postgres store with a stub db). (Fern P1, 2026-10-13)
    - `SHARED DEPENDENCY DIRECTORIES:` directories that hold only third-party dependencies (for example
      `node_modules`). A directory is shared by symlink into other worktrees, so list it only if it has no
      link to this repo's own source (no editable installs, no workspace links). If you are not sure, write `none`.

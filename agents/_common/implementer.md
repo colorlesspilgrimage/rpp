@@ -10,3 +10,5 @@ defects to fix or a direction from the user. Follow that direction.
 4. Do not edit PLAN or any VERIFY file.
 5. If the plan is unclear, make the smallest sensible choice. Record the choice in your report.
 6. Commit your work on the feature branch with clear commit messages.
+
+If a new or changed production file is under 85% covered, add a test before STATUS: DONE. A note that "CI will cover it" is not enough. (Fern P2, 2026-10-13)
