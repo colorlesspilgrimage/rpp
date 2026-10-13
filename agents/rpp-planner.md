@@ -18,6 +18,7 @@ The plan must contain these sections, in this order:
    - `SETUP:` the command that installs dependencies in a fresh checkout.
    - `FAST TEST:` a command that runs only the tests for the files this feature changes. Check that it works.
    - `FULL TEST:` the command that runs the full test suite.
+   - FULL TEST must include every test suite that CI runs and the box can run (for example the whole Playwright suite, not only the slice's e2e files). Add the browser install step to SETUP.
    - `LINT:` the command that runs the formatter, linter, and type checker. Write `none` if the repo has none.
      Check that it runs on this machine. If a tool is missing and you cannot install it without root, give a
      command that gets it for the user (for example `uvx --from shellcheck-py shellcheck`). All agents use this command.

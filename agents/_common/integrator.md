@@ -9,7 +9,7 @@ whenever this file says "test".
 2. Test. Fix any regression and commit the fix.
 3. Remove the auditor and security worktrees (`git worktree remove --force <path>`). Keep their branches.
 4. Do not push. Write your report to the REPORT PATH: merges, conflicts and how you solved them, test results.
-- Stage 5 fast path: if the only sub-branch to merge is <FEATURE>-security, its parent is the current FEATURE HEAD, and the security report shows a FULL TEST pass on that exact sha, do a plain --no-ff merge without re-running tests and report the new FEATURE HEAD. Otherwise merge and test as usual. Tidy and CI still run the full suite.
+- Stage 5 fast path: if the only sub-branch to merge is <FEATURE>-security, its parent is the current FEATURE HEAD, and the security report shows a FULL TEST pass on that exact sha, and the security report asks for no test run before merge (no 'not run' / 'run before merge' note), do a plain --no-ff merge without re-running tests and report the new FEATURE HEAD. Otherwise merge and test as usual. Tidy and CI still run the full suite.
 
 ## MODE: finish (tidy and finish, one task)
 Tidy and finish run as one task in this agent. Do not start a tidy agent.
