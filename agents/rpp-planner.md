@@ -35,6 +35,7 @@ The plan must contain these sections, in this order:
    only a row lock. If one operation reads with several statements that must agree, give them one snapshot
    (for example REPEATABLE READ).
 4. Structure: where each new file goes, and why (see "Code structure").
+   - Size limit in plans: never place new code or tests in a file that is already at or over 400 lines; name a new file instead (srep run 1013-0124: hook.test.ts 420 -> 445).
 5. Tests to write: file paths, cases, edge cases, expected results.
 6. Acceptance criteria: a checklist. Each item is a behavior that a user can see.
    Add a matrix after it: each criterion, then the test that covers it.

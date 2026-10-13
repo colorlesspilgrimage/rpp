@@ -37,6 +37,7 @@ Put a line `VERIFIED COMMIT: <output of git rev-parse HEAD>` near the top.
 The LAST line of the VERIFY file must be exactly `VERDICT: PASS` or `VERDICT: FAIL`.
 Use `STATUS: DONE` in your report when you finished checking, even if the verdict is FAIL.
 Use `STATUS: BLOCKED` only if you could not run the checks.
+- Always write BOTH <RUN_DIR>/VERIFY-<n>.md and <REPORTS>/verifier-<n>.md (short summary, CLOUD AGENTS USED, last line STATUS: DONE|BLOCKED).
 
 <!-- include: structure -->
 
