@@ -172,6 +172,7 @@ Set CI_ATTEMPT = 0. PR = the PR number from `gh pr view <FEATURE> --json number`
 ## Stage 9: Land
 Merging is automatic. If the feature prompt contains the word `no-merge`, log `land: skipped (no-merge)`,
 tell the user the PR is ready for review, and go to Stage 10. Otherwise set LAND_ROUND = 0.
+- GATE WAIVER (Sam, 2026-10-13 07:32 CT): Rosa may waive the land risk gate for Gus without asking Sam. Use judgment: waive only when the gate trip is explained and low-risk (e.g. extra verify round fixed by tests only); otherwise ask Sam. Tell Sam after each waiver.
 1. `task` agent `rpp-integrator`, name `integrator-land`. Task text: `MODE: land`, REPO, FEATURE, MAIN_BRANCH,
    PLAN, PR, REPORTS, `VERIFY ROUNDS: <number of verify FAIL lines in the state log, plus 1>`,
    `SECURITY_HIGH_RAN: yes|no`, and `REPORT PATH: <REPORTS>/integrator-land.md`.

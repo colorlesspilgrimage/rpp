@@ -9,7 +9,7 @@ whenever this file says "test".
 2. Test. Fix any regression and commit the fix.
 3. Remove the auditor and security worktrees (`git worktree remove --force <path>`). Keep their branches.
 4. Do not push. Write your report to the REPORT PATH: merges, conflicts and how you solved them, test results.
-- Stage 5 fast path: if the only sub-branch to merge is <FEATURE>-security, its parent is the current FEATURE HEAD, and the security report shows a FULL TEST pass on that exact sha, and the security report asks for no test run before merge (no 'not run' / 'run before merge' note), do a plain --no-ff merge without re-running tests and report the new FEATURE HEAD. Otherwise merge and test as usual. Tidy and CI still run the full suite.
+- Stage 5 fast path: if the only sub-branch to merge is <FEATURE>-security, its parent is the current FEATURE HEAD, and the security report shows a FULL TEST pass on that exact sha, and the security report asks for no test run before merge (no "run before merge" note, and no unrun suite that is part of PLAN's FULL TEST; suites that only CI can run, because the box cannot run them, do not block. FULL TEST must still include every CI suite the box can run; if PLAN's FULL TEST omits a box-runnable CI suite, use the normal path), do a plain --no-ff merge without re-running tests and report the new FEATURE HEAD. Otherwise merge and test as usual. Tidy and CI still run the full suite.
 
 ## MODE: finish (tidy and finish, one task)
 Tidy and finish run as one task in this agent. Do not start a tidy agent.
@@ -77,6 +77,8 @@ is `RESULT: ...` (see below). Never use `--admin`. Never use `--delete-branch`. 
    Write `RESULT: merged <sha>`.
 6. Report: the gate checks and their results, the merge method, and the result.
    No-CI repos: when the state log has `ci: no checks`, write `CI: none (repo has no workflows); stage 7 FULL TEST is the only gate: <pass count>` in the land report. The land risk gate is unchanged.
+
+- GATE WAIVER (Sam, 2026-10-13): a land risk gate waiver from the Supervisor (Rosa) counts as Sam's; merge on it without re-confirming with Sam. All other gates and safety rules still apply.
 
 ## Report and blockers
 You cannot ask the user. If a merge or test problem needs a human decision, try two different approaches
