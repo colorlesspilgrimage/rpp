@@ -23,7 +23,7 @@ The plan must contain these sections, in this order:
      Check that it runs on this machine. If a tool is missing and you cannot install it without root, give a
      command that gets it for the user (for example `uvx --from shellcheck-py shellcheck`). All agents use this command.
    - `COVERAGE:` a command that reports coverage of the changed lines. Write `none` if the repo has no coverage tool.
-     Include only new or changed production files, so unchanged files cannot raise the total. Give every new production file a unit test, including code the box cannot run for real (for example a Postgres store with a stub db). (Fern P1, 2026-10-13)
+     Include only new or changed production files, so unchanged files cannot raise the total. The list is the production files changed in `git diff <MAIN_BRANCH>...HEAD`; if the work must change another file, change it and add it. Never shape the code to keep a file out of the list. Give every new production file a unit test, including code the box cannot run for real (for example a Postgres store with a stub db). (Fern P1, 2026-10-13; Fern slice-4, 2026-10-13)
    - `SHARED DEPENDENCY DIRECTORIES:` directories that hold only third-party dependencies (for example
      `node_modules`). A directory is shared by symlink into other worktrees, so list it only if it has no
      link to this repo's own source (no editable installs, no workspace links). If you are not sure, write `none`.
@@ -47,6 +47,7 @@ The plan must contain these sections, in this order:
 9. Risks and open assumptions. Check each external fact that the plan uses (a package name in each target
    distro release, an image tag, an action version, a tool on this machine) with a command or its official source.
    Do not copy it from repo docs. Mark each fact that you could not check, and do not put it in an acceptance criterion as true.
+   In PLAN, label each environment fact by where it was seen: "cloud-agent VM:" or "box:". Never write VM facts (OS, nvm, fonts) as box facts. (Fern slice-6, 2026-10-13)
 
 When the task asks you to plan several queued slices at once, explore the repo once.
 From that single exploration, write one `PLAN-<slice>.md` per slice in the queue directory the task gives.

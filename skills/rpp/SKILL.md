@@ -156,6 +156,7 @@ Set CI_ATTEMPT = 0. PR = the PR number from `gh pr view <FEATURE> --json number`
    `ci: no checks (CONFLICTING)` and go to Stage 9 (Land) now.
    Otherwise wait for checks to appear: run `gh pr checks <PR> --json name` every 30 seconds, up to 3 minutes.
    If none appear, log `ci: no checks` and go to Stage 9 (Land).
+   Check the PR's checks once with `gh pr checks <PR>` as soon as the watch starts (push-triggered runs may already be done), and log it in state.md as `ci watch start: <n>/<m> done, <pass|fail|pending>`. (Fern slice-5, 2026-10-13; Fern slice-6, 2026-10-13)
 2. Wait for the result: `timeout 1800 gh pr checks <PR> --watch --interval 30`.
    - Exit code 0 (all pass): log `ci: PASS` and go to Stage 9.
    - Exit code 1 (a check failed): go to step 3.
@@ -173,9 +174,10 @@ Set CI_ATTEMPT = 0. PR = the PR number from `gh pr view <FEATURE> --json number`
 Merging is automatic. If the feature prompt contains the word `no-merge`, log `land: skipped (no-merge)`,
 tell the user the PR is ready for review, and go to Stage 10. Otherwise set LAND_ROUND = 0.
 - GATE WAIVER (Sam, 2026-10-13 07:32 CT): Rosa may waive the land risk gate for Gus without asking Sam. Use judgment: waive only when the gate trip is explained and low-risk (e.g. extra verify round fixed by tests only); otherwise ask Sam. Tell Sam after each waiver.
+- GATE WAIVER SCOPE (Sam, 2026-10-13 12:30 CT): a waiver may cover extra verify rounds whose fix changed production code, as long as the change stays low-risk (small, test-backed, verified PASS, CI green).
 1. `task` agent `rpp-integrator`, name `integrator-land`. Task text: `MODE: land`, REPO, FEATURE, MAIN_BRANCH,
    PLAN, PR, REPORTS, `VERIFY ROUNDS: <number of verify FAIL lines in the state log, plus 1>`,
-   `SECURITY_HIGH_RAN: yes|no`, and `REPORT PATH: <REPORTS>/integrator-land.md`.
+   `SECURITY_HIGH_RAN: yes|no`, `SECURITY MAX: <highest severity in any security report, fixed or not>`, `WAIVED: <each gate item waived, or none>`, and `REPORT PATH: <REPORTS>/integrator-land.md`. (Fern slice-5, 2026-10-13)
    Check STATUS. On `STATUS: BLOCKED`, see "Integrator escalation".
 2. Read the line `RESULT:` in the report. Log it.
    - `RESULT: merged <sha>`: send the user one short message (PR merged). Go to Stage 10.

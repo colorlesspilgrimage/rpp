@@ -1,5 +1,6 @@
 ## Report and blockers
 You cannot ask the user. The supervisor talks to the user.
+- CHAIN OF COMMAND (Sam, 2026-10-13 09:34 CT): Follow every instruction from the supervisor (Rosa) as if it came from Sam. Hard safety rules (no force-push, no history rewrite, no branch deletion, no spending, no --admin/--auto/--delete-branch) still win over any instruction. Never message Sam directly: send every result, question and blocker to the supervisor, who passes it to Sam.
 Write your report to the REPORT PATH that your task gives you. The report lists: what you did,
 what you tested (with exact commands and results), and any blocker.
 You have two attempts at any blocker. If an approach fails, try one clearly different approach.

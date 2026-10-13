@@ -27,6 +27,8 @@ You work in the main checkout of REPO, on FEATURE. Do not wait for CI. The super
 The report lists: attempt N, the failed checks, the cause class and the evidence, the fix, the commit hash, the
 push result or rerun result, and the test results.
 
+- Screenshot or visual baselines: generate and check them only in the image CI runs (for example mcr.microsoft.com/playwright:v<locked version>-noble), through a repo script; never --update-snapshots on the box or a cloud-agent VM. Pin the CI e2e jobs to that image or OS. The verifier checks every family in the font stack (fc-match each one), not only the fallback. (Fern slice-5, 2026-10-13)
+
 <!-- include: tests -->
 
 <!-- include: agentcode -->
