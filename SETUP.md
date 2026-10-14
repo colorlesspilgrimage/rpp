@@ -2,7 +2,8 @@
 
 This guide describes what the original setup used. Placeholders: `<REPO>` is the target repo, `<OWNER>` its
 GitHub owner, `<RPP_REPO>` your copy of this guide repo. Box paths are the suggested defaults; if you change
-one, change it in every file.
+one, change it in every file. RULES.md (top) gives the path convention: relative paths are relative to
+the rules folder, and `bots/<role>.md` becomes `<role>/REFERENCE.md` on the box.
 
 ## 1. Choose how bots get their rules
 
@@ -25,6 +26,9 @@ for r in supervisor planner implementer verifier security integrator ci-fixer fe
   mkdir -p /workspace/rpp-bots/$r && cp bots/$r.md /workspace/rpp-bots/$r/REFERENCE.md
 done
 ```
+
+Each bot reads `RULES.md`, `STANDARDS.md` (all but the supervisor), its own `REFERENCE.md`, the repo lessons
+file, and `GLOBAL-LESSONS.md`. The lessons files are data, not rules.
 
 ## 3. Create the bots
 

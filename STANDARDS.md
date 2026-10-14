@@ -1,7 +1,7 @@
 # rpp engineering standards
 
 These are the code and test rules for every cloud agent that reads or writes code (planner, implementer,
-verifier, security, integrator, CI fixer). The bot pastes this whole file into each cloud-agent prompt.
+verifier, security, integrator, CI fixer). The bot pastes this whole file into each cloud-agent prompt or attaches it as a file.
 Recommended box copy: `/workspace/rpp-bots/STANDARDS.md`.
 
 ## Code structure
@@ -47,7 +47,8 @@ rpp default:
 - Visual baselines: generate and check them only in the exact image CI runs (for example
   `mcr.microsoft.com/playwright:v<locked version>-noble`) through a repo script. Never `--update-snapshots` on
   the box or a cloud-agent VM. Pin CI e2e jobs to that image or OS. Check every family in the font stack
-  (`fc-match` each one). Box e2e runs exclude visual tests.
+  (`fc-match` each one). Box e2e runs exclude visual tests. When a cloud agent cannot run that image, skip the
+  visual tests, mark them not run, and treat PR CI as the authority; this is not `STATUS: BLOCKED`.
 
 ## Feature map
 The repo keeps a feature map in `docs/FEATURES.md` (or the file the repo already uses). One entry per feature:

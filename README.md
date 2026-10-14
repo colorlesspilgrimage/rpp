@@ -64,7 +64,7 @@ sections of `bots/security.md` and `bots/integrator.md`.
 | `README.md` | This file. |
 | `SETUP.md` | Step-by-step recreation in Grok Bot. |
 | `RULES.md` | The full cross-bot rules: chain of command, handoff format, limits, safety, models, gates, FEEDBACK APPLY, lessons. |
-| `STANDARDS.md` | Code and test rules that bots paste into every cloud-agent prompt. |
+| `STANDARDS.md` | Code and test rules that bots paste into (or attach to) every cloud-agent prompt. |
 | `bots/<role>.md` | One file per bot: profile fields and its instructions. |
 | `templates/` | Blank `state.md`, `PLAN.md`, report skeletons, and an empty `GLOBAL-LESSONS.md`. |
 | `LICENSE` | License. |
