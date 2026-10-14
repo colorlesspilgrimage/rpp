@@ -74,3 +74,4 @@ sections of `bots/security.md` and `bots/integrator.md`.
 `skills/` holds optional reusable Grok Bot skills.
 
 - [comslop](skills/comslop/SKILL.md) strips comments that aren't about implementation quirks, using a cloud agent.
+- [wth](skills/wth/SKILL.md) the Supervisor briefs the user on bot activity since the last update, or only on the items they name.
