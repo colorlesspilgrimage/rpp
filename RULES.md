@@ -105,6 +105,8 @@ matching line in each bot file together.
   `<REPORTS>/integrator-land-gate.md` in one tool step. Only in a later tool call does it merge. The gate file's
   mtime must be earlier than GitHub's `merged_at`. Never run a gate check in parallel with the merge. Quote only
   times from `stat`, `date`, or GitHub.
+  Never edit a gate file after you write it. This also applies to any other gate file, for example a Stage 5
+  gate file. Write the merge result in a different file.
 
 ## 7. FEEDBACK APPLY
 After Stage 10 the supervisor applies the feedback bot's proposals without asking the owner:

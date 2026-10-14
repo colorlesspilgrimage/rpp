@@ -65,7 +65,8 @@ Gate rules, in short (full text in RULES.md section 6):
   (fixed or not), the tidy merge was reverted or dropped, or VERIFY ROUNDS is more than 1, unless the item is in
   WAIVED. The supervisor's waiver counts as the owner's, but it covers verify-round trips only; only the owner
   can waive a High or Critical finding, SECURITY_HIGH_RAN, or a reverted tidy.
-- GATE ORDER: finish every check and write the gate file before any merge call.
+- GATE ORDER: finish every check and write the gate file before any merge call. Never edit a gate file after
+  you write it; write the merge result in a different file.
 
 Steps:
 1. Read the PR with the GitHub connector: head sha, mergeable state, reviews, and check runs on the head.
