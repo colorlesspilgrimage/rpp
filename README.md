@@ -68,3 +68,9 @@ sections of `bots/security.md` and `bots/integrator.md`.
 | `bots/<role>.md` | One file per bot: profile fields and its instructions. |
 | `templates/` | Blank `state.md`, `PLAN.md`, report skeletons, and an empty `GLOBAL-LESSONS.md`. |
 | `LICENSE` | License. |
+
+## Skills
+
+`skills/` holds optional reusable Grok Bot skills.
+
+- [comslop](skills/comslop/SKILL.md) strips comments that aren't about implementation quirks, using a cloud agent.
