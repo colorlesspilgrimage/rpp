@@ -47,6 +47,9 @@ Other bots with no prior context read the plan. It must be complete alone. Use `
    - `COVERAGE:` per-file coverage of new or changed production files, or `none` (see STANDARDS.md).
      Get the file list from `git diff --name-only <MAIN_BRANCH>...HEAD` when the command runs. Do not tell a
      bot to keep a file out of the list.
+     Prove the per-file gate: run the command once with an include for a file that no test covers. It must
+     exit non-zero with a per-file message. Write both commands and exit codes in your report. For Vitest, use
+     the bare `--coverage.thresholds.perFile` flag; `=85` and `=true` do not enforce.
    - Environment facts, each labeled `box:` or `cloud-agent VM:`. Never write VM facts as box facts.
 3. Implementation steps, in order, with exact file paths and function or module names.
    - When text from a user, a file, or the environment goes into a shell command, a path, or a file format,

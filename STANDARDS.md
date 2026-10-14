@@ -38,6 +38,9 @@ rpp default:
 - Security checklist: OWASP ASVS Level 1 for apps and APIs, OWASP Top 10 for web features, CWE Top 25 for
   code-level flaws, OWASP Top 10 for LLM applications when the feature calls an LLM. Every security finding
   gets a severity and a CWE or ASVS id.
+- Destructive file operations: a script deletes or overwrites only files that it created in a temp directory.
+  PLAN names each file a script may delete. The verifier runs each such script once with every path input
+  (environment variable or argument) set to a canary file, and checks that the canary file still exists.
 - Dependencies and secrets: run the dependency audit (`npm audit`, `pip-audit`, `cargo audit`, `govulncheck`)
   and `gitleaks` on the diff when the tool exists. Without gitleaks, review the diff by hand and say so.
 - UI: check the WCAG 2.2 AA basics (labels, keyboard use, contrast, focus).

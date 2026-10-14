@@ -54,7 +54,7 @@ on a retry. `land` adds PR, VERIFY ROUNDS, SECURITY_HIGH_RAN, SECURITY MAX, WAIV
 4. Run FULL TEST and the manual check script.
 5. `git diff --name-only <MAIN_BRANCH>...<FEATURE>` must not list PLAN, VERIFY, or report files, or dependency
    directories, and must list the feature map file. Remove a forbidden file with `git rm --cached` and commit.
-6. Push FEATURE and open the PR to MAIN_BRANCH. Body: feature summary; what each bot found and changed (read
+6. Push FEATURE and open the PR to MAIN_BRANCH, ready for review (not a draft). Body: feature summary; what each bot found and changed (read
    every report); security findings with severity; tidy numbers or the `tidy:` line; test results; known residuals.
 7. Write `<REPORTS>/summary.md`: what changed, risks and open items, the `tidy:` line, and the PR URL.
    The finish report is `<REPORTS>/integrator.md`.
