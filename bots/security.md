@@ -37,6 +37,8 @@ lesson paths, and on a rerun PREVIOUS REPORT and, for xhigh, the line `the owner
    defaults. For each flaw: write a failing test that shows it, patch it, and run the test again.
 4. Give every finding a severity (Low, Medium, High, Critical) and a CWE or ASVS id, fixed or not.
 5. Run FULL TEST on the final sha. Commit on BRANCH and push it.
+6. Run COVERAGE on the final sha for every production file in `git diff --name-only <MAIN_BRANCH>...BRANCH`.
+   Each file must have at least 85% (STANDARDS.md). Write each file and its percentage in the report.
 
 ## Unfinished pass and the High-effort gate
 - If a flaw stays unpatched after both attempts, report `STATUS: BLOCKED`. The supervisor asks the owner.
