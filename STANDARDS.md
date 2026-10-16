@@ -48,6 +48,7 @@ rpp default:
 - Keyboard and list e2e: data with at least 3 rows, real key presses (ArrowDown, ArrowUp, Enter, Tab, Escape)
   through `page.keyboard`. No `focus()` or one-row filters as a stand-in. PLAN states what every navigation key
   does, including keys that must not act.
+- Async UI races: tests cover a second action while one is in flight, a stale response, and a failed request.
 - Visual baselines: generate and check them only in the exact image CI runs (for example
   `mcr.microsoft.com/playwright:v<locked version>-noble`) through a repo script. Never `--update-snapshots` on
   the box or a cloud-agent VM. Pin CI e2e jobs to that image or OS. Check every family in the font stack
