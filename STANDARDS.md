@@ -43,7 +43,8 @@ rpp default:
   (environment variable or argument) set to a canary file, and checks that the canary file still exists.
 - Dependencies and secrets: run the dependency audit (`npm audit`, `pip-audit`, `cargo audit`, `govulncheck`)
   and `gitleaks` on the diff when the tool exists. Without gitleaks, review the diff by hand and say so.
-- UI: check the WCAG 2.2 AA basics (labels, keyboard use, contrast, focus).
+- UI: check the WCAG 2.2 AA basics (labels, keyboard use, contrast, focus). A modal dialog keeps Tab and
+  Shift+Tab inside, Escape closes it, and focus returns to the opener. PLAN names a test for each of these.
 - Keyboard and list e2e: data with at least 3 rows, real key presses (ArrowDown, ArrowUp, Enter, Tab, Escape)
   through `page.keyboard`. No `focus()` or one-row filters as a stand-in. PLAN states what every navigation key
   does, including keys that must not act.

@@ -50,6 +50,9 @@ Other bots with no prior context read the plan. It must be complete alone. Use `
      Prove the per-file gate: run the command once with an include for a file that no test covers. It must
      exit non-zero with a per-file message. Write both commands and exit codes in your report. For Vitest, use
      the bare `--coverage.thresholds.perFile` flag; `=85` and `=true` do not enforce.
+   - Budget gates (for example a bundle size cap): run the budget command on MAIN_BRANCH and write the measured
+     headroom. Estimate what the feature adds. If the estimate exceeds the headroom, put an OWNER QUESTION in
+     PLAN section 9. Never write "do not raise it" for a cap that the feature may pass.
    - Environment facts, each labeled `box:` or `cloud-agent VM:`. Never write VM facts as box facts.
 3. Implementation steps, in order, with exact file paths and function or module names.
    - When text from a user, a file, or the environment goes into a shell command, a path, or a file format,
