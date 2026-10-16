@@ -1,0 +1,2 @@
+- Refresh a queued plan's budget numbers from the last merged slice before you start the next one.
+- Test every network action in a UI for a second action, a stale response, and a failed request.
