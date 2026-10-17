@@ -1,2 +1,4 @@
 - Refresh a queued plan's budget numbers from the last merged slice before you start the next one.
 - Test every network action in a UI for a second action, a stale response, and a failed request.
+- Test a move from one record id to another on the same screen; no field of the old record may stay.
+- Apply a new rule file edit before you start the next task; a task that starts first runs on the old rules.
