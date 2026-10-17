@@ -75,6 +75,7 @@ Steps:
    `CI: none (no checks on the first watch check); FULL TEST in tidy+finish is the only gate: <pass count>`);
    mergeable; no CHANGES_REQUESTED; SECURITY_HIGH_RAN; SECURITY MAX; tidy reverted; VERIFY ROUNDS; WAIVED.
    End that tool step.
+   At land, list the non-test files changed after the security sha, read their guards, and note them in the gate file.
 3. A tripped, unwaived item: write `RESULT: not merged: <risk gate (<which>) | checks not green | changes requested>`
    and stop. The PR stays open.
 4. Conflicting, or behind MAIN_BRANCH where the repo requires it current: a cloud agent merges
