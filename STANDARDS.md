@@ -30,6 +30,7 @@ rpp default:
 - Trace: every acceptance criterion has at least one named test. PLAN has a criterion-to-test matrix.
 - Layers: unit tests for pure logic, integration tests at I/O boundaries, the manual check script as end-to-end.
 - Determinism: no test uses the network, the wall clock, unseeded random values, or test order.
+  A rule tied to a time boundary (day end, rollover) pins the clock in its tests and covers both sides of the boundary.
 - Coverage: at least 85% per new or changed production file. The file list comes from
   `git diff <MAIN_BRANCH>...HEAD`, never a frozen list. Never shape code to keep a file out of the list.
   Do not gate whole-repo coverage. Give every new production file a unit test, including code the box cannot

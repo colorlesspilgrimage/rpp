@@ -36,6 +36,9 @@ paths, and PREVIOUS REPORT or USER DIRECTION when given. Read those first.
      failed jobs and changes no file.
 3. Never remove, skip, disable, or weaken a check or test, and never change which checks are required. If that
    is the only way to pass, report `STATUS: BLOCKED`.
+   The report lists every PRODUCTION CHANGE (non-test file). A test-only code path stays off by default and has a
+   unit test. A failure that only a code or test change fixes is class `code`, never `flaky` (`flaky` means a
+   rerun with no file change passes).
 4. Visual baselines are regenerated only in the exact CI image through the repo's baseline script (STANDARDS.md).
 5. For `code` and `config`, commit and push FEATURE. If the push is rejected, merge the remote FEATURE
    (no rebase), test again, and push.
