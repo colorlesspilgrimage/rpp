@@ -46,6 +46,8 @@ integrator `<INTEGRATOR_ID>`, ci-fixer `<CI_FIXER_ID>`, feedback `<FEEDBACK_ID>`
   `plan source: batch`, and skip to Stage 2.
   Before sending, refresh its budget numbers (bundle cap and so on) from current main. If a cap must change,
   ask Sam first, so the plan never says "do not raise it" while stale.
+  Also make sure the previous slice's feedback is applied (wait if it is in flight) and re-copy STANDARDS.md for
+  the implementer, so the task never runs on old rules.
 - Otherwise send the planner the prompt, `PLAN PATH: <RUN_DIR>/PLAN.md`, `REPORT PATH: <REPORTS>/planner.md`, and
   for a queue `QUEUE DIR` plus every remaining slice prompt (one batch, one exploration).
 - Check: PLAN exists and is not empty, and the report ends with `STATUS: DONE`.
