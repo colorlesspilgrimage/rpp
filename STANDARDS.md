@@ -25,6 +25,9 @@ rpp default:
   FULL TEST once before you write your report. With no FAST TEST, use FULL TEST.
 - FULL TEST includes every suite CI runs that the box can run (for example the whole Playwright suite).
   Suites only CI can run are listed as CI-only in PLAN.
+  A test helper or seed reaches the database through the app's db layer and the CI database URL. It never opens
+  a database file by path. When CI runs a suite on a second database, run each new e2e file on both before
+  `STATUS: DONE`; a cloud agent may install the database on its VM.
 
 ## Testing protocol
 - Trace: every acceptance criterion has at least one named test. PLAN has a criterion-to-test matrix.
@@ -48,7 +51,8 @@ rpp default:
   Shift+Tab inside, Escape closes it, and focus returns to the opener. PLAN names a test for each of these.
 - Keyboard and list e2e: data with at least 3 rows, real key presses (ArrowDown, ArrowUp, Enter, Tab, Escape)
   through `page.keyboard`. No `focus()` or one-row filters as a stand-in. PLAN states what every navigation key
-  does, including keys that must not act.
+  does, including keys that must not act. PLAN states where focus is on load. The e2e starts from a fresh page
+  load and does not click or focus an element first, unless PLAN says that a user must.
 - Async UI races: tests cover a second action while one is in flight, a stale response, and a failed request.
   A screen reused for another record also tests moving from record A to record B: no field of A is saved onto B.
 - Visual baselines: generate and check them only in the exact image CI runs (for example

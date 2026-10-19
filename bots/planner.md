@@ -57,6 +57,8 @@ Other bots with no prior context read the plan. It must be complete alone. Use `
 3. Implementation steps, in order, with exact file paths and function or module names.
    - When text from a user, a file, or the environment goes into a shell command, a path, or a file format,
      give the full escaping rule for each place. Never say a safety measure (for example `--`) is not needed.
+   - When a screen shows a limit or a limit message, name the request that can reach it (page size and
+     parameters). Do not plan a limit message that no request can reach.
    - When a step reads, decides, and then writes, keep it correct under parallel requests: read in the same
      transaction as the write, and name the row lock, the isolation level, or the atomic update. All writers of
      the same rows take the same lock. An advisory lock does not stop a writer that takes only a row lock.
